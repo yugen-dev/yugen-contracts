@@ -1,7 +1,9 @@
 # yugen-contracts
 ## Yugen Finance Contracts
 
-Yugen Finance is a DeFi-Yield aggregator that generates money by aggregating income from various initiatives. 
+### [Website](https://yugen.finance/) | [Yugen App](https://app.yugen.finance/) | [Twitter](https://twitter.com/YugenFinance_) | [Telegram](https://t.me/YugenFinance) | [Instagram](https://www.instagram.com/yugenfinance/) | [Medium](https://blog.yugen.finance/)
+
+**Yugen Finance** is a DeFi-Yield aggregator that generates money by aggregating income from various initiatives. 
 The platform also comes with a basic app that can be used on both desktop and mobile platforms. 
 This makes Yugen Finance the first DeFi return aggregator that makes money with other platforms. 
 Liquidity Provider Coins are placed on the Fantom, Avalanche, and Harmony blockchain in multiple farms by Yugen Finance. 
@@ -38,6 +40,7 @@ yarn run test
 
 ### Polygon
 
+
 - YGN Token -	0xA33aAa07853038943eF2c32cDE73a094cF993EE0
 - FYGN Token - 0x397e10ee5e315f69b23cb6c8a913a589b5850c80
 - Universal Converter -	0x1188772c9810CfECAc6c35fFdE41A710983b01Ec
@@ -59,4 +62,3 @@ yarn run test
 - Ethalend USDC	- 0x4585A780F83d81f5A31fd5e07328ac53df54e2D5
 - Ethalend USDT	- 0x50EF226fFB852Fb34fF6367E2Fc9730f11Cce1EB
 
-### [Yugen Website](https://yugen.finance/) [Yugen App](https://app.yugen.finance/) [Yugen Docs](https://docs.yugen.finance/)
