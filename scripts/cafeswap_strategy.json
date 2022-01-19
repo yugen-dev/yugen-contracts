@@ -1,0 +1,8 @@
+{
+  "asset": "0x3EF3a87d745FABCAc255E9352Ea402d20F922C1C",
+  "rewardToken": "0xb5106A3277718eCaD2F20aB6b86Ce0Fee7A21F09",
+  "masterChefContract": "0xca2DeAc853225f5a4dfC809Ae0B7c6e39104fCe5",
+  "ygnConverter": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec",
+  "farm": "0xe713DaAa96035982bf01F041c2BB248B5E07882a",
+  "pid": "18"
+}

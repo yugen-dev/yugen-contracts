@@ -1,0 +1,12 @@
+{
+  "asset": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+  "rewardToken": "0x948D0a28b600BDBd77AF4ea30E6F338167034181",
+  "masterChefContract": "0xdd694f459645eb6efae934fe075403760eeb9aa1",
+  "ygnConverter": "0xb60B993862673A87C16E4e6e5F75397131EEBb3e",
+  "farm": "",
+  "pid": "0",
+  "universalOneSidedFarm": "0x2e4ae5adec4a31afbdb9cce96255a77a7875c252",
+  "nachoLP": "0x8D25fec513309F2d329d99d6F677D46C831FDEe8",
+  "quickSwapRouter": "0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff",
+  "secondaryAsset": "0xcD86152047e800d67BDf00A4c635A8B6C0e5C4c2"
+}

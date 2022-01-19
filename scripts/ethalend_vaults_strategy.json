@@ -1,0 +1,44 @@
+{
+  "ethalendUSDTVault": {
+    "ASSET_ADDRESS": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "SECONDARY_ASSET": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    "REWARD_TOKEN": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+    "ETHA_TOKEN": "0x59e9261255644c411afdd00bd89162d09d862e38",
+    "registry": "0x583B965462e11Da63D1d4bC6D2d43d391F79af1f",
+    "curvePool": "0x445fe580ef8d70ff569ab36e80c647af338db351",
+    "ethalendTransferLogicContract": "0x589e3a1285de27b5efdaf7bbcf63aa6b3dbff9d9",
+    "ethalendCurveLogicContract": "0xe8dd7766f476af2d0676429567b7e39c3ff358c0",
+    "ethalendQuickSwapLogicContract": "0xdA3B84867B9e78026D523d7717fb83d93c90B378",
+    "ethalendVaultLogicContract": "0x6e7cdde3a8ec102c888bd5df292bf28656be8323",
+    "ethalendEVault": "0x8dE8637412e70916Ee2CAA3b62C569d9A88391A3",
+    "YGN_CONVERTER": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec"
+  },
+  "ethalendUSDCVault": {
+    "ASSET_ADDRESS": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    "SECONDARY_ASSET": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+    "REWARD_TOKEN": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+    "ETHA_TOKEN": "0x59e9261255644c411afdd00bd89162d09d862e38",
+    "registry": "0x583B965462e11Da63D1d4bC6D2d43d391F79af1f",
+    "curvePool": "0x445fe580ef8d70ff569ab36e80c647af338db351",
+    "ethalendTransferLogicContract": "0x589e3a1285de27b5efdaf7bbcf63aa6b3dbff9d9",
+    "ethalendCurveLogicContract": "0xe8dd7766f476af2d0676429567b7e39c3ff358c0",
+    "ethalendQuickSwapLogicContract": "0xdA3B84867B9e78026D523d7717fb83d93c90B378",
+    "ethalendVaultLogicContract": "0x6e7cdde3a8ec102c888bd5df292bf28656be8323",
+    "ethalendEVault": "0xb56AAb9696B95a75A6edD5435bc9dCC4b07403b0",
+    "YGN_CONVERTER": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec"
+  },
+  "ethalendDAIVault": {
+    "ASSET_ADDRESS": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+    "SECONDARY_ASSET": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "REWARD_TOKEN": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+    "ETHA_TOKEN": "0x59e9261255644c411afdd00bd89162d09d862e38",
+    "registry": "0x583B965462e11Da63D1d4bC6D2d43d391F79af1f",
+    "curvePool": "0x445fe580ef8d70ff569ab36e80c647af338db351",
+    "ethalendTransferLogicContract": "0x589e3a1285de27b5efdaf7bbcf63aa6b3dbff9d9",
+    "ethalendCurveLogicContract": "0xe8dd7766f476af2d0676429567b7e39c3ff358c0",
+    "ethalendQuickSwapLogicContract": "0xdA3B84867B9e78026D523d7717fb83d93c90B378",
+    "ethalendVaultLogicContract": "0x6e7cdde3a8ec102c888bd5df292bf28656be8323",
+    "ethalendEVault": "0x04D5bc0fdD251484A7a2224cEE818C7ce2412dbc",
+    "YGN_CONVERTER": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec"
+  }
+}

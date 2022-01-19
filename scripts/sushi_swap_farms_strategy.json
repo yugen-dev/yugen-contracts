@@ -1,0 +1,9 @@
+{
+  "asset": "0x9803c7aE526049210a1725F7487AF26fE2c24614",
+  "rewardToken": "0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a",
+  "wmatic": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+  "miniChefContract": "0x0769fd68dFb93167989C6f7254cd0D766Fb2841F",
+  "ygnConverter": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec",
+  "farm": "0xe713DaAa96035982bf01F041c2BB248B5E07882a",
+  "pid": "49"
+}
