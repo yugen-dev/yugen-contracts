@@ -8,4 +8,13 @@ interface IFarm {
         address _user,
         bool _userWantsToStake
     ) external;
+
+    function withdrawFor(
+        uint256 _pid,
+        uint256 _amount,
+        address _user,
+        bool _userWantsToStake
+    ) external;
+
+    function poolLength() external view returns (uint256);
 }
