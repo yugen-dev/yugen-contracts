@@ -28,7 +28,7 @@ module.exports = {
     localhost: {
       url: "http://localhost:8545",
     },
-    polygon: {
+    matic: {
       url: INFURA_API,
       accounts: [`0x${PRIVATE_KEY}`],
     },

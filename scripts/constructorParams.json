@@ -32,5 +32,10 @@
       "startDistribution": "1639144800",
       "endDistribution": "1654696800"
     }
+  },
+  "liquidityMigratorV1": {
+    "farm": "0xe713DaAa96035982bf01F041c2BB248B5E07882a",
+    "rewardManager": "0x27677dEBc3c6F0d1400d9C947D947f1B77857E86",
+    "fYGN": "0x397e10ee5e315f69b23cb6c8a913a589b5850c80"
   }
 }
