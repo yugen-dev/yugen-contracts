@@ -39,28 +39,27 @@ describe("Yugen Farm Contract", function () {
     console.log("Farm deployed at " + this.farmInstance.address);
     await this.fygnTokenInstance.whitelistMinter(this.farmInstance.address);
 
-    const SushiSwapFarmsStrategy = await hre.ethers.getContractFactory("SushiSwapFarmsStrategy");
-    this.sushiSwapFarmsStrategyInstance = await SushiSwapFarmsStrategy.deploy(
-      SushiSwapStrategyParams.asset,
-      SushiSwapStrategyParams.rewardToken,
-      SushiSwapStrategyParams.wmatic,
-      SushiSwapStrategyParams.miniChefContract,
+    const QuickSwapFarmsStrategy = await hre.ethers.getContractFactory("QuickSwapFarmsStrategy");
+    this.quickSwapFarmsStrategyInstance = await QuickSwapFarmsStrategy.deploy(
+      QuickSwapStrategyParams.asset,
+      QuickSwapStrategyParams.rewardToken,
+      QuickSwapStrategyParams.stakingRewardsContract,
       this.feeAddress,
       this.farmInstance.address,
-      SushiSwapStrategyParams.pid
+      QuickSwapStrategyParams.quickTokenAddress
     );
-    await this.sushiSwapFarmsStrategyInstance.deployed();
+    await this.quickSwapFarmsStrategyInstance.deployed();
     console.log(
-      "SushiSwapFarmsStrategy deployed at " + this.sushiSwapFarmsStrategyInstance.address
+      "QuickSwapFarmsStrategy deployed at " + this.quickSwapFarmsStrategyInstance.address
     );
 
     const lpToken1 = await ethers.getContractFactory("ERC20Mock");
-    this.lpToken1Instance = lpToken1.attach(SushiSwapStrategyParams.asset);
+    this.lpToken1Instance = lpToken1.attach(QuickSwapStrategyParams.asset);
 
     //Reward Tokens pairing
 
-    const SushiToken = await ethers.getContractFactory("ERC20Mock");
-    this.sushiTokenInstance = SushiToken.attach(SushiSwapStrategyParams.rewardToken);
+    const QuickToken = await ethers.getContractFactory("ERC20Mock");
+    this.quickTokenInstance = QuickToken.attach(QuickSwapStrategyParams.quickTokenAddress);
 
     //adding child farms to yugen
     await this.farmInstance.add(
@@ -68,7 +67,7 @@ describe("Yugen Farm Contract", function () {
       this.lpToken1Instance.address,
       0,
       300,
-      this.sushiSwapFarmsStrategyInstance.address,
+      this.quickSwapFarmsStrategyInstance.address,
       true
     );
   });
@@ -96,7 +95,7 @@ describe("Yugen Farm Contract", function () {
     expect(poolInfo0.allocPoint).to.equal(String(100));
     expect(poolInfo0.withdrawalFeeBP).to.equal(Number(0));
     expect(poolInfo0.harvestInterval).to.equal(Number(300));
-    expect(poolInfo0.strategy).to.equal(this.sushiSwapFarmsStrategyInstance.address);
+    expect(poolInfo0.strategy).to.equal(this.quickSwapFarmsStrategyInstance.address);
   });
 
   it("should correctly update pool alloc point", async function () {
@@ -138,7 +137,7 @@ describe("Yugen Farm Contract", function () {
 
   it("should pause deposit/withdraw when contract is paused", async function () {
     await this.farmInstance.pause();
-    let user = "0x0A53E28f2f7b27971E18a6305C2C74A449BADd2e";
+    let user = "0xc04daf3df8b917afa96fd41a1c5d6dbc23aad3d7";
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [user],
@@ -163,7 +162,7 @@ describe("Yugen Farm Contract", function () {
   });
 
   it("should correctly deposit and withdraw in quickswap dual rewards farms", async function () {
-    let user = "0x0A53E28f2f7b27971E18a6305C2C74A449BADd2e";
+    let user = "0xc04daf3df8b917afa96fd41a1c5d6dbc23aad3d7";
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [user],
@@ -191,15 +190,15 @@ describe("Yugen Farm Contract", function () {
     //Initial FYGN Balance
     expect(await this.fygnTokenInstance.balanceOf(signer.address)).to.equal(Number(0));
     //Initial QUICK and WMATIC Balance in ygn converter
-    expect(await this.sushiTokenInstance.balanceOf(this.feeAddress)).to.equal(Number(0));
+    expect(await this.quickTokenInstance.balanceOf(this.feeAddress)).to.equal(Number(0));
     console.log(
       "Total Input Tokens Staked in Farms",
       (await this.farmInstance.poolInfo(0)).totalInputTokensStaked
     );
-    console.log("LP in Protocol", await this.sushiSwapFarmsStrategyInstance.getTotalLPStaked());
+    console.log("LP in Protocol", await this.quickSwapFarmsStrategyInstance.getTotalLPStaked());
     console.log(
       "Total Input Tokens Staked in Protocol",
-      await this.sushiSwapFarmsStrategyInstance.totalInputTokensStaked()
+      await this.quickSwapFarmsStrategyInstance.totalInputTokensStaked()
     );
 
     await this.farmInstance.connect(signer).withdraw(0, depositAmount.div(2), false);
@@ -207,10 +206,10 @@ describe("Yugen Farm Contract", function () {
       "Total Input Tokens Staked in Farms",
       (await this.farmInstance.poolInfo(0)).totalInputTokensStaked
     );
-    console.log("LP in Protocol", await this.sushiSwapFarmsStrategyInstance.getTotalLPStaked());
+    console.log("LP in Protocol", await this.quickSwapFarmsStrategyInstance.getTotalLPStaked());
     console.log(
       "Total Input Tokens Staked in Protocol",
-      await this.sushiSwapFarmsStrategyInstance.totalInputTokensStaked()
+      await this.quickSwapFarmsStrategyInstance.totalInputTokensStaked()
     );
     userInfo = await this.farmInstance.userInfo(0, signer.address);
     lpSupply = await this.farmInstance.getLpTokenAmount(0);
@@ -222,18 +221,18 @@ describe("Yugen Farm Contract", function () {
     //After YGN Balance
     expect((await this.fygnTokenInstance.balanceOf(signer.address)) / 10 ** 18).to.equal(Number(6));
     //After reward token Balance in ygn converter
-    console.log("quick balance : ", await this.sushiTokenInstance.balanceOf(this.feeAddress));
-    expect(await this.sushiTokenInstance.balanceOf(this.feeAddress)).gt(0);
+    console.log("quick balance : ", await this.quickTokenInstance.balanceOf(this.feeAddress));
+    expect(await this.quickTokenInstance.balanceOf(this.feeAddress)).gt(0);
     for (let i = 0; i < 10; i++) {
       advanceTime(60);
       advanceBlock();
     }
-    expect(Number(await this.sushiTokenInstance.balanceOf(this.feeAddress))).to.be.greaterThan(0);
+    expect(Number(await this.quickTokenInstance.balanceOf(this.feeAddress))).to.be.greaterThan(0);
     advanceTime(300);
     advanceBlock();
     advanceBlock();
 
-    await this.sushiSwapFarmsStrategyInstance.rescueFunds(this.lpToken1Instance.address);
+    await this.quickSwapFarmsStrategyInstance.rescueFunds(this.lpToken1Instance.address);
 
     await this.farmInstance.connect(signer).emergencyWithdraw(0);
     userInfo = await this.farmInstance.userInfo(0, signer.address);
@@ -245,7 +244,7 @@ describe("Yugen Farm Contract", function () {
     expect(totalInputTokensStaked).to.equal(getBigNumber(0));
     expect(await this.fygnTokenInstance.balanceOf(signer.address)).to.equal(parseEther("6"));
     //After QUICK Balance in ygn converter
-    expect(Number(await this.sushiTokenInstance.balanceOf(this.feeAddress))).to.be.greaterThan(0);
+    expect(Number(await this.quickTokenInstance.balanceOf(this.feeAddress))).to.be.greaterThan(0);
     await this.fygnTokenInstance.connect(signer).transfer(this.feeAddress, parseEther("6"));
     await expect(
       this.farmInstance.connect(signer).deposit(0, depositAmount, false)
