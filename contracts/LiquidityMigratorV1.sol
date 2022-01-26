@@ -54,15 +54,15 @@ contract LiquidityMigratorV1 is Ownable, ReentrancyGuard {
         //User wants to stake is false since it doesn't matter as all rewards come back to migrator as its excluded by the reward managers.
         uint256 beforeWithdrawTokenBalance = _token.balanceOf(address(this));
         farm.withdrawFor(_oldPid, _amount, msg.sender, false);
-
-        //Can't check with full amount at two points (before calling depositFor as well) since some pools could have withdraw fees.
         uint256 afterWithdrawTokenBalance = _token.balanceOf(address(this));
-        require(afterWithdrawTokenBalance > 0, "No Lp tokens received in migrator");
         uint256 newDepositAmount = afterWithdrawTokenBalance.sub(beforeWithdrawTokenBalance);
-        require(
-            newDepositAmount <= _amount && newDepositAmount > 0,
-            "Insufficient Lp tokens received in migrator"
-        );
+
+        /*
+        1. Can't compare this with full amount since some pools could have withdraw fees.
+        2. Cant add require for deposit amount to be less than equal to amount since there could be chances that more amount is withdrawn due to staking than what is deposited.
+        So the best way is that deposit amount is whatever is withdrawn for the user. after-before.
+        */
+        require(newDepositAmount > 0, "Insufficient Lp tokens received in migrator");
 
         //Migrator vests users's fYGN to reward manager for the user
         uint256 fYGNBalance = fYGN.balanceOf(address(this));
