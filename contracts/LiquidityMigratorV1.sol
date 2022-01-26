@@ -52,10 +52,17 @@ contract LiquidityMigratorV1 is Ownable, ReentrancyGuard {
 
         //Withdraw old LP tokens from farm.
         //User wants to stake is false since it doesn't matter as all rewards come back to migrator as its excluded by the reward managers.
+        uint256 beforeWithdrawTokenBalance = _token.balanceOf(address(this));
         farm.withdrawFor(_oldPid, _amount, msg.sender, false);
 
         //Can't check with full amount at two points (before calling depositFor as well) since some pools could have withdraw fees.
-        require(_token.balanceOf(address(this)) > 0, "No Lp tokens received in migrator");
+        uint256 afterWithdrawTokenBalance = _token.balanceOf(address(this));
+        require(afterWithdrawTokenBalance > 0, "No Lp tokens received in migrator");
+        uint256 newDepositAmount = afterWithdrawTokenBalance.sub(beforeWithdrawTokenBalance);
+        require(
+            newDepositAmount <= _amount && newDepositAmount > 0,
+            "Insufficient Lp tokens received in migrator"
+        );
 
         //Migrator vests users's fYGN to reward manager for the user
         uint256 fYGNBalance = fYGN.balanceOf(address(this));
@@ -65,10 +72,10 @@ contract LiquidityMigratorV1 is Ownable, ReentrancyGuard {
         }
 
         //Deposit token in new farm pool which has the same token as the inputToken.
-        TransferHelper.safeApprove(address(_token), address(farm), _amount);
-        farm.depositFor(_newPid, _amount, msg.sender, _userWantsToStake);
+        TransferHelper.safeApprove(address(_token), address(farm), newDepositAmount);
+        farm.depositFor(_newPid, newDepositAmount, msg.sender, _userWantsToStake);
 
-        emit LiquidityMigrated(_oldPid, _newPid, _amount, _token);
+        emit LiquidityMigrated(_oldPid, _newPid, newDepositAmount, _token);
     }
 
     // Rescue any tokens that have not been able to processed by the contract
