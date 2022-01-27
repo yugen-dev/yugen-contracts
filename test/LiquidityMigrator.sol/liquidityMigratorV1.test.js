@@ -10,7 +10,7 @@ const ConstructorParams = require("../../scripts/constructorParams.json");
 const QuickSwapStrategyParams = require("../../scripts/quick_swap_farms_strategy.json");
 const EthalendParams = require("../../scripts/ethalend_vaults_strategy.json");
 
-describe.only("Liquidity Migrator V1", function () {
+describe("Liquidity Migrator V1", function () {
   before(async function () {
     this.signers = await ethers.getSigners();
     this.signer = this.signers[0];
