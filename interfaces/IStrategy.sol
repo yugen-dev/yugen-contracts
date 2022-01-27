@@ -21,4 +21,6 @@ interface IStrategy {
     function updateStrategyMode(bool _isStrategyEnabled) external;
 
     function updateSupportsEmergencyWithdraw(bool _supportsEmergencyWithdraw) external;
+
+    function updatePool() external;
 }
