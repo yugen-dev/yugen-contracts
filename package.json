@@ -41,7 +41,11 @@
     "deployCafeSwapStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_cafeswap.js",
     "deployEthalendUSDTVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendUSDTVault.js",
     "deployEthalendUSDCVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendUSDCVault.js",
-    "deployEthalendDAIVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendDAIVault.js"
+    "deployEthalendDAIVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendDAIVault.js",
+    "deployLiquidityMigratorV1:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
+    "deployLiquidityMigratorV1:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
+    "deployConverterHelper:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployConverterHelper.js",
+    "deployConverterHelper:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployConverterHelper.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

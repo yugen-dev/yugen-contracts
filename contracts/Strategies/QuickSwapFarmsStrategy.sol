@@ -226,13 +226,16 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
         uint256 pendingRewards = getStakingRewards();
         if (pendingRewards > 0) {
             _claimRewards();
-            uint256 rewardTokenRewards = rewardToken.balanceOf(address(this));
-
-            IDQuick(address(rewardToken)).leave(rewardTokenRewards);
-
-            uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
-            TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
+        } else {
+            // when no rewards are present
+            return;
         }
+        uint256 rewardTokenRewards = rewardToken.balanceOf(address(this));
+
+        IDQuick(address(rewardToken)).leave(rewardTokenRewards);
+
+        uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
+        TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
     }
 
     /**

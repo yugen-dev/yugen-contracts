@@ -1,8 +1,8 @@
 {
-  "asset": "",
+  "asset": "0x1C84Cd20Ea6cc100E0A890464411F1365Ab1F664",
   "rewardToken": "0xf28164A485B0B2C90639E47b0f377b4a438a16B1",
   "quickTokenAddress": "0x831753DD7087CaC61aB5644b308642cc1c33Dc13",
-  "stakingRewardsContract": "",
+  "stakingRewardsContract": "0x5100AF5e00Ed294D6F6AF398e7e0891820920E1C",
   "ygnConverter": "",
   "farm": ""
 }
