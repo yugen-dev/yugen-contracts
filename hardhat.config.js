@@ -41,6 +41,14 @@ module.exports = {
       url: ETHEREUM_RPC_URL,
       accounts: [`0x${PRIVATE_KEY}`],
     },
+    fantom_mainnet: {
+      url: INFURA_API,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
+    fantom_testnet: {
+      url: INFURA_API,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
   },
   etherscan: {
     // Your API key for Etherscan
