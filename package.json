@@ -45,7 +45,11 @@
     "deployLiquidityMigratorV1:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
     "deployLiquidityMigratorV1:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
     "deployConverterHelper:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployConverterHelper.js",
-    "deployConverterHelper:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployConverterHelper.js"
+    "deployConverterHelper:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployConverterHelper.js",
+    "deploy_ftm_wrapper:main": "HARDHAT_NETWORK=fantom_mainnet npx hardhat run scripts/deploy/fantom/deployFTMWrapper.js",
+    "deploy_ftm_wrapper:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/deployFTMWrapper.js",
+    "deploy_tarot_supply_vault_strategy:main": "HARDHAT_NETWORK=fantom_mainnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js",
+    "deploy_tarot_supply_vault_strategy:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
