@@ -7,7 +7,7 @@
     "supplyVault": "0x0defef0c977809db8c1a3f13fd8dacbd565d968e"
   },
   "USDC": {
-    "asset": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
+    "asset": "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75",
     "supplyVault": "0x68d211bc1e66814575d89bbe4f352b4cdbdacdfb"
   },
   "ETH": {

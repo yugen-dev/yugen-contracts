@@ -205,33 +205,32 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev internal function to get latest total underlying balance in Supply Vaults (deposited plus rewards).
+     * @dev function to get latest total underlying balance in Supply Vaults (deposited plus rewards).
      */
-    function _getTotalUnderlyingBalance() internal returns (uint256 totalUnderlyingBalance) {
-        totalUnderlyingBalance = supplyVault.underlyingBalanceForAccount(address(this));
+    function getTotalUnderlyingBalance() public returns (uint256 totalUnderlyingBalance) {
+        if (totalInputTokensStaked > 0) {
+            totalUnderlyingBalance = supplyVault.underlyingBalanceForAccount(address(this));
+        }
     }
 
     /**
-     * @dev internal function to get share value (number of tokens) for the respective underlying amount
+     * @dev function to get share value (number of tokens) for the respective underlying amount
      */
-    function _getUnderlyingValuedAsShare(uint256 _underlyingAmount)
-        internal
-        returns (uint256 share)
-    {
-        share = supplyVault.underlyingValuedAsShare(_underlyingAmount);
+    function getUnderlyingValuedAsShare(uint256 _underlyingAmount) public returns (uint256 share) {
+        if (_underlyingAmount > 0) {
+            share = supplyVault.underlyingValuedAsShare(_underlyingAmount);
+        }
     }
 
     /**
      * @dev View function to process supply vault rewards.
      */
     function _processSupplyVaultRewards() internal returns (uint256 earnedRewards) {
-        uint256 totalUnderlyingBalance = _getTotalUnderlyingBalance();
+        uint256 totalUnderlyingBalance = getTotalUnderlyingBalance();
         uint256 underlyingAmountToWithdraw = totalUnderlyingBalance.sub(totalInputTokensStaked);
         //make sure to log this and see if correct and greater than zero
         if (underlyingAmountToWithdraw > 0) {
-            uint256 rewardSharesToWithdraw = _getUnderlyingValuedAsShare(
-                underlyingAmountToWithdraw
-            );
+            uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(underlyingAmountToWithdraw);
             earnedRewards = _withdrawAsset(rewardSharesToWithdraw);
         }
     }
@@ -240,7 +239,7 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
      * @notice External function to see pending underlying rewards on frontend.
      */
     function getPendingRewards() external nonReentrant returns (uint256 pendingRewards) {
-        uint256 totalUnderlyingBalance = _getTotalUnderlyingBalance();
+        uint256 totalUnderlyingBalance = getTotalUnderlyingBalance();
         pendingRewards = totalUnderlyingBalance.sub(totalInputTokensStaked);
     }
 
@@ -309,7 +308,7 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         updatePool();
         if (_amount > 0) {
             if (isStrategyEnabled) {
-                uint256 rewardSharesToWithdraw = _getUnderlyingValuedAsShare(_amount);
+                uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(_amount);
                 //check here if it only withdraws that specific amount and no rewards
                 withdrawnAmount = _withdrawAsset(rewardSharesToWithdraw);
             } else {
