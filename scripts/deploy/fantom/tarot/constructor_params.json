@@ -3,7 +3,7 @@
   "ygnConverter": "",
   "farm": "",
   "FTM": {
-    "asset": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
+    "asset": "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
     "supplyVault": "0x0defef0c977809db8c1a3f13fd8dacbd565d968e"
   },
   "USDC": {

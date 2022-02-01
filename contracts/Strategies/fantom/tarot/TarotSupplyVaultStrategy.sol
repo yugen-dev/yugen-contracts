@@ -227,9 +227,9 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
      */
     function _processSupplyVaultRewards() internal returns (uint256 earnedRewards) {
         uint256 totalUnderlyingBalance = getTotalUnderlyingBalance();
-        uint256 underlyingAmountToWithdraw = totalUnderlyingBalance.sub(totalInputTokensStaked);
-        //make sure to log this and see if correct and greater than zero
-        if (underlyingAmountToWithdraw > 0) {
+        if (totalUnderlyingBalance > totalInputTokensStaked) {
+            uint256 underlyingAmountToWithdraw = totalUnderlyingBalance.sub(totalInputTokensStaked);
+            //make sure to log this and see if correct and greater than zero
             uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(underlyingAmountToWithdraw);
             earnedRewards = _withdrawAsset(rewardSharesToWithdraw);
         }
@@ -305,10 +305,11 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         nonReentrant
         returns (uint256 withdrawnAmount)
     {
-        updatePool();
         if (_amount > 0) {
             if (isStrategyEnabled) {
+                updatePool();
                 uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(_amount);
+
                 //check here if it only withdraws that specific amount and no rewards
                 withdrawnAmount = _withdrawAsset(rewardSharesToWithdraw);
             } else {
@@ -323,12 +324,14 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
      * @dev function to withdraw asset from Tarot Supply Vaults Contract to strategy
      */
     function _withdrawAsset(uint256 _sharesToWithdraw) internal returns (uint256 withdrawnAmount) {
-        TransferHelper.safeApprove(
-            address(vaultToken),
-            address(supplyVaultRouter),
-            _sharesToWithdraw
-        );
-        withdrawnAmount = supplyVaultRouter.leave(supplyVault, _sharesToWithdraw);
+        if (_sharesToWithdraw > 0) {
+            TransferHelper.safeApprove(
+                address(vaultToken),
+                address(supplyVaultRouter),
+                _sharesToWithdraw
+            );
+            withdrawnAmount = supplyVaultRouter.leave(supplyVault, _sharesToWithdraw);
+        }
     }
 
     /**
