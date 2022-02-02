@@ -28,8 +28,8 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
     // whitelisted liquidityHolders
     mapping(address => bool) public liquidityHolders;
 
-    event SetYGNConverter(address indexed user, address indexed ygnConverter);
-    event RescueAsset(address farm, uint256 rescuedAssetAmount);
+    event SetYGNConverter(address indexed owner, address indexed ygnConverter);
+    event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
@@ -39,7 +39,7 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
 
     modifier ensureValidTokenAddress(address _token) {
         require(_token != address(0), "No zero address");
-        require(_token == address(asset), "Invalid token for deposit/withdraw");
+        require(_token == address(asset), "Invalid token");
         _;
     }
 
@@ -67,8 +67,8 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
     ) {
         asset = _asset;
         supplyVault = _supplyVault;
-        supplyVaultRouter = _supplyVaultRouter;
         vaultToken = IERC20(address(_supplyVault));
+        supplyVaultRouter = _supplyVaultRouter;
         ygnConverter = _ygnConverter;
         farm = _farm;
         liquidityHolders[_farm] = true;
@@ -182,14 +182,14 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice transfer accumulated tTokens. Shouldn't be called since this will transfer community's tTokens residue to ygnConverter
+     * @notice transfer accumulated tTokens. Shouldn't be called since this will transfer community's tTokens residue to owner (We dont send these to converter as we need to deal with them manually)
      * @dev Only owner can call and claim the tTokens residue
      */
     function transferVaultTokenResidue() external onlyOwner nonReentrant {
         updatePool();
         uint256 vaultTokenResidue = vaultToken.balanceOf(address(this));
         if (vaultTokenResidue > 0) {
-            TransferHelper.safeTransfer(address(vaultToken), ygnConverter, vaultTokenResidue);
+            TransferHelper.safeTransfer(address(vaultToken), owner(), vaultTokenResidue);
         }
     }
 
@@ -230,8 +230,8 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         if (totalUnderlyingBalance > totalInputTokensStaked) {
             uint256 underlyingAmountToWithdraw = totalUnderlyingBalance.sub(totalInputTokensStaked);
             //make sure to log this and see if correct and greater than zero
-            uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(underlyingAmountToWithdraw);
-            earnedRewards = _withdrawAsset(rewardSharesToWithdraw);
+            uint256 sharesToWithdraw = getUnderlyingValuedAsShare(underlyingAmountToWithdraw);
+            earnedRewards = _withdrawAsset(sharesToWithdraw);
         }
     }
 
@@ -240,7 +240,9 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
      */
     function getPendingRewards() external nonReentrant returns (uint256 pendingRewards) {
         uint256 totalUnderlyingBalance = getTotalUnderlyingBalance();
-        pendingRewards = totalUnderlyingBalance.sub(totalInputTokensStaked);
+        if (totalUnderlyingBalance > totalInputTokensStaked) {
+            pendingRewards = totalUnderlyingBalance.sub(totalInputTokensStaked);
+        }
     }
 
     /**
@@ -252,11 +254,9 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         }
 
         uint256 earnedRewards = _processSupplyVaultRewards();
-        if (earnedRewards > 0) {
-            //send rewards to converter
+        if (earnedRewards > 0 && asset.balanceOf(address(this)) >= earnedRewards) {
             TransferHelper.safeTransfer(address(asset), ygnConverter, earnedRewards);
         } else {
-            // when no rewards are present
             return;
         }
     }
@@ -277,7 +277,12 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         require(isStrategyEnabled, "Strategy is disabled");
         updatePool();
         if (_amount > 0) {
-            TransferHelper.safeTransferFrom(_token, farm, address(this), _amount);
+            TransferHelper.safeTransferFrom(
+                address(asset),
+                address(msg.sender),
+                address(this),
+                _amount
+            );
             depositedAmount = _depositAsset(_amount);
         }
         totalInputTokensStaked = totalInputTokensStaked.add(_amount);
@@ -308,10 +313,9 @@ contract TarotSupplyVaultStrategy is Ownable, ReentrancyGuard {
         if (_amount > 0) {
             if (isStrategyEnabled) {
                 updatePool();
-                uint256 rewardSharesToWithdraw = getUnderlyingValuedAsShare(_amount);
-
+                uint256 sharesToWithdraw = getUnderlyingValuedAsShare(_amount);
                 //check here if it only withdraws that specific amount and no rewards
-                withdrawnAmount = _withdrawAsset(rewardSharesToWithdraw);
+                withdrawnAmount = _withdrawAsset(sharesToWithdraw);
             } else {
                 withdrawnAmount = _getWithdrawableAmount(_amount);
             }

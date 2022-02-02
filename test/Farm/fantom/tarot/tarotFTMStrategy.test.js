@@ -73,6 +73,11 @@ describe("Tarot FTM Strategy - Yugen Farm Contract", function () {
       params: [depositor],
     });
     this.depositor = await ethers.getSigner(depositor);
+
+    console.log(
+      "WFTM Balance before tests",
+      await this.assetTokenInstance.balanceOf(this.depositor.address)
+    );
   });
 
   it("should set correct state variables", async function () {
@@ -311,5 +316,9 @@ describe("Tarot FTM Strategy - Yugen Farm Contract", function () {
       parseEther("19")
     );
     expect(Number(await this.assetTokenInstance.balanceOf(this.feeAddress))).to.be.greaterThan(0);
+    console.log(
+      "WFTM Balance after tests",
+      await this.assetTokenInstance.balanceOf(this.depositor.address)
+    );
   });
 });
