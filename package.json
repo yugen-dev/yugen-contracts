@@ -37,6 +37,7 @@
     "deploy_farm_wrapper:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deploy_farm_wrapper.js",
     "deployYGN:ethereum": "HARDHAT_NETWORK=eth_mainnet npx hardhat run scripts/deploy/deploy_ygn.js",
     "deployQuickDualFarms:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_quickswap_farms_dual.js",
+    "deployQuickFarmsStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_quickswap_farm_strategy.js",
     "deploySushiSwapStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_sushiswap_strategy.js",
     "deployCafeSwapStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_cafeswap.js",
     "deployEthalendUSDTVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendUSDTVault.js",
