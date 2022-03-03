@@ -5,8 +5,8 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "../../interfaces/IStakingRewards.sol";
-import "../../interfaces/IStrategy.sol";
+import "interfaces/IStakingRewards.sol";
+import "interfaces/IStrategy.sol";
 import "../libraries/TransferHelper.sol";
 
 contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
@@ -32,7 +32,6 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     event SetYGNConverter(address indexed owner, address indexed ygnConverter);
     event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
-    event StrategySwitched(IStrategy oldStrategy, IStrategy newStrategy);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
         require(addressToCheck != address(0), "No zero address");
