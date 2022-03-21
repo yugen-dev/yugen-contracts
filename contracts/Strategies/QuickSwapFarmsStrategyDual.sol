@@ -31,8 +31,8 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     // whitelisted liquidityHolders
     mapping(address => bool) public liquidityHolders;
 
-    event SetYGNConverter(address indexed user, address indexed ygnConverter);
-    event RescueAsset(address farm, uint256 rescuedAssetAmount);
+    event SetYGNConverter(address indexed owner, address indexed ygnConverter);
+    event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
@@ -42,7 +42,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
 
     modifier ensureValidTokenAddress(address _token) {
         require(_token != address(0), "No zero address");
-        require(_token == address(asset), "Invalid token for deposit/withdraw");
+        require(_token == address(asset), "Invalid token");
         _;
     }
 
@@ -85,6 +85,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     function updateLiquidityHolder(address _liquidityHolder, bool _status)
         external
         onlyOwner
+        nonReentrant
         ensureNonZeroAddress(_liquidityHolder)
     {
         liquidityHolders[_liquidityHolder] = _status;
@@ -96,7 +97,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      * @param _isStrategyEnabled bool flag to enable disable strategy
      * @dev Only owner can call and update the strategy mode
      */
-    function updateStrategyMode(bool _isStrategyEnabled) external onlyOwner {
+    function updateStrategyMode(bool _isStrategyEnabled) external onlyOwner nonReentrant {
         isStrategyEnabled = _isStrategyEnabled;
     }
 
@@ -105,7 +106,11 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      * @param _supportsEmergencyWithdraw bool flag to enable disable if protocol supports emergency withdraw
      * @dev Only owner can call and update this
      */
-    function updateSupportsEmergencyWithdraw(bool _supportsEmergencyWithdraw) external onlyOwner {
+    function updateSupportsEmergencyWithdraw(bool _supportsEmergencyWithdraw)
+        external
+        onlyOwner
+        nonReentrant
+    {
         supportsEmergencyWithdraw = _supportsEmergencyWithdraw;
     }
 
@@ -114,7 +119,12 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      * @param _farm Address of the farm
      * @dev Only owner can call and update the farm address
      */
-    function updateFarmAddress(address _farm) external onlyOwner ensureNonZeroAddress(_farm) {
+    function updateFarmAddress(address _farm)
+        external
+        onlyOwner
+        nonReentrant
+        ensureNonZeroAddress(_farm)
+    {
         liquidityHolders[farm] = false;
         farm = _farm;
         liquidityHolders[farm] = true;
@@ -128,6 +138,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     function updateQuickSwapStakingRewardsContract(IStakingRewards _stakingRewardsContract)
         external
         onlyOwner
+        nonReentrant
         ensureNonZeroAddress(address(_stakingRewardsContract))
     {
         stakingRewardsContract = _stakingRewardsContract;
@@ -138,7 +149,12 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      * @param _asset Address of the QuickSwap LP
      * @dev Only owner can call and update the QuickSwap LP address
      */
-    function updateAsset(IERC20 _asset) external onlyOwner ensureNonZeroAddress(address(_asset)) {
+    function updateAsset(IERC20 _asset)
+        external
+        onlyOwner
+        nonReentrant
+        ensureNonZeroAddress(address(_asset))
+    {
         asset = _asset;
     }
 
@@ -151,6 +167,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     function updateRewardToken(IERC20 _rewardA, IERC20 _rewardB)
         external
         onlyOwner
+        nonReentrant
         ensureNonZeroAddress(address(_rewardA))
         ensureNonZeroAddress(address(_rewardB))
     {
@@ -162,6 +179,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     function setYGNConverter(address _ygnConverter)
         external
         onlyOwner
+        nonReentrant
         ensureNonZeroAddress(_ygnConverter)
     {
         ygnConverter = _ygnConverter;
@@ -172,17 +190,19 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      * @notice transfer accumulated asset. Shouldn't be called since this will transfer community's residue asset to ygnConverter
      * @dev Only owner can call and claim the assets residue
      */
-    function transferAssetResidue() external onlyOwner {
+    function transferAssetResidue() external onlyOwner nonReentrant {
         updatePool();
         uint256 assetResidue = asset.balanceOf(address(this));
-        TransferHelper.safeTransfer(address(asset), ygnConverter, assetResidue);
+        if (assetResidue > 0) {
+            TransferHelper.safeTransfer(address(asset), ygnConverter, assetResidue);
+        }
     }
 
     /**
      * @notice transfer accumulated reward tokens.
      * @dev Only owner can call and claim the reward tokens residue
      */
-    function transferRewardTokenRewards() external onlyOwner {
+    function transferRewardTokenRewards() external onlyOwner nonReentrant {
         updatePool();
 
         uint256 rewardARewards = rewardA.balanceOf(address(this));
@@ -281,7 +301,12 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         require(isStrategyEnabled, "Strategy is disabled");
         updatePool();
         if (_amount > 0) {
-            TransferHelper.safeTransferFrom(_token, farm, address(this), _amount);
+            TransferHelper.safeTransferFrom(
+                address(asset),
+                address(msg.sender),
+                address(this),
+                _amount
+            );
             depositedAmount = _depositAsset(_amount);
         }
         totalInputTokensStaked = totalInputTokensStaked.add(_amount);
@@ -290,10 +315,10 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     /**
      * @dev function to deposit asset from strategy to Quickswap Staking Contract.
      */
-    function _depositAsset(uint256 _amount) internal returns (uint256 lpReceived) {
-        asset.safeApprove(address(stakingRewardsContract), _amount);
+    function _depositAsset(uint256 _amount) internal returns (uint256 depositedAmount) {
+        TransferHelper.safeApprove(address(asset), address(stakingRewardsContract), _amount);
         stakingRewardsContract.stake(_amount);
-        lpReceived = _amount;
+        depositedAmount = _amount;
     }
 
     /**
@@ -309,14 +334,14 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         nonReentrant
         returns (uint256 withdrawnAmount)
     {
-        updatePool();
         if (_amount > 0) {
             if (isStrategyEnabled) {
+                updatePool();
                 withdrawnAmount = _withdrawAsset(_amount);
             } else {
                 withdrawnAmount = _getWithdrawableAmount(_amount);
             }
-            IERC20(_token).safeApprove(address(msg.sender), withdrawnAmount);
+            TransferHelper.safeApprove(address(asset), address(msg.sender), withdrawnAmount);
         }
         totalInputTokensStaked = totalInputTokensStaked.sub(_amount);
     }
@@ -324,9 +349,9 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     /**
      * @dev function to withdraw asset from Quickswap Stakign Contract to strategy
      */
-    function _withdrawAsset(uint256 _lpAmountToWithdraw) internal returns (uint256 assetWithdrawn) {
-        stakingRewardsContract.withdraw(_lpAmountToWithdraw);
-        assetWithdrawn = _lpAmountToWithdraw;
+    function _withdrawAsset(uint256 _amountToWithdraw) internal returns (uint256 withdrawnAmount) {
+        stakingRewardsContract.withdraw(_amountToWithdraw);
+        withdrawnAmount = _amountToWithdraw;
     }
 
     /**
@@ -339,12 +364,13 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     /**
      * @notice function to withdraw all asset and transfer back to liquidity holder.
      * @param _token Address of the token. (Should be the same as the asset token)
-     * @dev Can only be called from the liquidity manager by the owner
+     * @dev Can only be called by the owner
      */
     function rescueFunds(address _token)
         external
         ensureValidTokenAddress(_token)
         onlyOwner
+        nonReentrant
         returns (uint256 rescuedAssetAmount)
     {
         updatePool();
