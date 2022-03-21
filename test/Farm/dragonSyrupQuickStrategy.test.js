@@ -10,7 +10,7 @@ const QuickSwapDragonStrategyParams = require("../../scripts/quick_swap_dragon_s
 const { parseEther } = require("ethers/lib/utils");
 const FYGN_PER_BLOCK = "1000000000000000000";
 
-describe.only("Yugen Farm Contract with QUICK Token", function () {
+describe("Yugen Farm Contract with QUICK Token", function () {
   before(async function () {
     this.signers = await ethers.getSigners();
     this.signer = this.signers[0];
@@ -273,22 +273,7 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
 
     //Bico Token
     this.newRewardToken = this.ERC20Mock.attach("0x91c89A94567980f0e9723b487b0beD586eE96aa7");
-
-    const QuickSwapDragonSyrupStrategy = await hre.ethers.getContractFactory(
-      "QuickSwapDragonSyrupStrategy"
-    );
-    this.newQuickSwapDragonSyrupQuickStrategyInstance = await QuickSwapDragonSyrupStrategy.deploy(
-      QuickSwapDragonStrategyParams.asset,
-      this.newRewardToken.address,
-      "0x5D474ddBb7da6275eB22fff06f28615F0B457c9d",
-      this.feeAddress,
-      this.farmInstance.address
-    );
-    await this.newQuickSwapDragonSyrupQuickStrategyInstance.deployed();
-    console.log(
-      "New QuickSwapFarmsStrategy deployed at " +
-        this.newQuickSwapDragonSyrupQuickStrategyInstance.address
-    );
+    this.newStakingRewardsContract = "0x5D474ddBb7da6275eB22fff06f28615F0B457c9d";
 
     console.log(
       `New Reward Token is ${await this.newRewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -300,20 +285,9 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
 
     //Calling Switch Strategy Flow
 
-    //whitelisting old strategy in new strategy aka adding liquidity holder
-    await this.newQuickSwapDragonSyrupQuickStrategyInstance.updateLiquidityHolder(
-      this.quickSwapDragonSyrupQuickStrategyInstance.address,
-      true
-    );
-
-    await this.farmInstance.updatePoolStrategy(
-      0,
-      this.newQuickSwapDragonSyrupQuickStrategyInstance.address,
-      true
-    );
-
     await this.quickSwapDragonSyrupQuickStrategyInstance.switchStrategy(
-      this.newQuickSwapDragonSyrupQuickStrategyInstance.address
+      this.newStakingRewardsContract,
+      this.newRewardToken.address
     );
 
     const totalDepositAmount = parseEther("17");
@@ -321,7 +295,7 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
     let lpSupply = await this.farmInstance.getLpTokenAmount(0);
     let totalInputTokensStaked = (await this.farmInstance.poolInfo(0)).totalInputTokensStaked;
     let totalInputTokensStakedInStrategy =
-      await this.newQuickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
     expect(userInfo.amount).to.equal(totalDepositAmount);
     expect(lpSupply).to.equal(totalDepositAmount);
     expect(totalInputTokensStaked).to.equal(totalDepositAmount);
@@ -353,11 +327,11 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
     );
     console.log(
       "LP in Protocol",
-      await this.newQuickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
+      await this.quickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
     );
     console.log(
       "Total Input Tokens Staked in Protocol",
-      await this.newQuickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
     );
 
     await this.farmInstance.connect(this.depositor).withdraw(0, depositAmount.div(2), false);
@@ -367,11 +341,11 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
     );
     console.log(
       "LP in Protocol",
-      await this.newQuickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
+      await this.quickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
     );
     console.log(
       "Total Input Tokens Staked in Protocol",
-      await this.newQuickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
     );
 
     userInfo = await this.farmInstance.userInfo(0, this.depositor.address);
@@ -396,7 +370,130 @@ describe.only("Yugen Farm Contract with QUICK Token", function () {
     advanceBlock();
     advanceBlock();
 
-    await this.newQuickSwapDragonSyrupQuickStrategyInstance.rescueFunds(this.assetToken.address);
+    await this.quickSwapDragonSyrupQuickStrategyInstance.rescueFunds(this.assetToken.address);
+    await this.farmInstance.connect(this.depositor).emergencyWithdraw(0);
+
+    userInfo = await this.farmInstance.userInfo(0, this.depositor.address);
+    lpSupply = await this.farmInstance.getLpTokenAmount(0);
+    totalInputTokensStaked = (await this.farmInstance.poolInfo(0)).totalInputTokensStaked;
+
+    expect(userInfo.amount).to.equal(getBigNumber(0));
+    expect(lpSupply).to.equal(getBigNumber(0));
+    expect(totalInputTokensStaked).to.equal(getBigNumber(0));
+    expect(Number(await this.newRewardToken.balanceOf(this.feeAddress))).to.be.greaterThan(0);
+    await expect(
+      this.farmInstance.connect(this.depositor).deposit(0, depositAmount, false)
+    ).to.be.revertedWith("Strategy is disabled");
+
+    console.log(
+      "Asset balance for depositor after flow",
+      await this.assetToken.balanceOf(this.depositor.address)
+    );
+    await this.quickSwapDragonSyrupQuickStrategyInstance.updateStrategyMode(true);
+  });
+
+  it("should correctly switch strategy and deposit in new strategy", async function () {
+    //Deploying new strategy (This is also quick token dragon syrup strategy)
+
+    //Bico Token
+    this.newRewardToken = this.ERC20Mock.attach("0xB382C1cfA622795a534e5bd56Fac93d59BAc8B0D");
+    this.newStakingRewardsContract = "0xB68842d78ef33C2b327f863D0E0e293C81d7a243";
+
+    console.log(
+      `New Reward Token is ${await this.newRewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
+    );
+
+    //Depositing in old strategy.
+    await this.farmInstance.connect(this.depositor).deposit(0, parseEther("10"), false);
+    await this.farmInstance.connect(this.depositor).deposit(0, parseEther("7"), false);
+
+    //Calling Switch Strategy Flow
+
+    await this.quickSwapDragonSyrupQuickStrategyInstance.switchStrategy(
+      this.newStakingRewardsContract,
+      this.newRewardToken.address
+    );
+
+    const totalDepositAmount = parseEther("17");
+    let userInfo = await this.farmInstance.userInfo(0, this.depositor.address);
+    let lpSupply = await this.farmInstance.getLpTokenAmount(0);
+    let totalInputTokensStaked = (await this.farmInstance.poolInfo(0)).totalInputTokensStaked;
+    let totalInputTokensStakedInStrategy =
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
+    expect(userInfo.amount).to.equal(totalDepositAmount);
+    expect(lpSupply).to.equal(totalDepositAmount);
+    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
+    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
+  });
+
+  it("should correctly deposit and withdraw in new quickswap dragon syrup farms", async function () {
+    const depositAmount = parseEther("20");
+    expect(await this.newRewardToken.balanceOf(this.feeAddress)).to.equal(Number(0));
+    await this.farmInstance.connect(this.depositor).deposit(0, parseEther("3"), false);
+    let userInfo = await this.farmInstance.userInfo(0, this.depositor.address);
+    let lpSupply = await this.farmInstance.getLpTokenAmount(0);
+    let totalInputTokensStaked = (await this.farmInstance.poolInfo(0)).totalInputTokensStaked;
+    expect(userInfo.amount).to.equal(depositAmount);
+    expect(lpSupply).to.equal(depositAmount);
+    expect(totalInputTokensStaked).to.equal(depositAmount);
+
+    for (let i = 0; i < 5; i++) {
+      advanceTime(60);
+      advanceBlock();
+    }
+
+    expect(await this.farmInstance.canHarvest(0, this.depositor.address)).to.equal(true);
+
+    console.log(
+      "Total Input Tokens Staked in Farms",
+      (await this.farmInstance.poolInfo(0)).totalInputTokensStaked
+    );
+    console.log(
+      "LP in Protocol",
+      await this.quickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
+    );
+    console.log(
+      "Total Input Tokens Staked in Protocol",
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
+    );
+
+    await this.farmInstance.connect(this.depositor).withdraw(0, depositAmount.div(2), false);
+    console.log(
+      "Total Input Tokens Staked in Farms",
+      (await this.farmInstance.poolInfo(0)).totalInputTokensStaked
+    );
+    console.log(
+      "LP in Protocol",
+      await this.quickSwapDragonSyrupQuickStrategyInstance.getTotalLPStaked()
+    );
+    console.log(
+      "Total Input Tokens Staked in Protocol",
+      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked()
+    );
+
+    userInfo = await this.farmInstance.userInfo(0, this.depositor.address);
+    lpSupply = await this.farmInstance.getLpTokenAmount(0);
+    totalInputTokensStaked = (await this.farmInstance.poolInfo(0)).totalInputTokensStaked;
+
+    expect(userInfo.amount).to.equal(depositAmount.div(2));
+    expect(lpSupply).to.equal(depositAmount.div(2));
+    expect(totalInputTokensStaked).to.equal(depositAmount.div(2));
+    expect(await this.farmInstance.pendingFYGN(0, this.depositor.address)).to.equal(
+      getBigNumber(0)
+    );
+    expect(await this.newRewardToken.balanceOf(this.feeAddress)).gt(0);
+
+    console.log("reward token balance : ", await this.newRewardToken.balanceOf(this.feeAddress));
+    for (let i = 0; i < 10; i++) {
+      advanceTime(60);
+      advanceBlock();
+    }
+    expect(Number(await this.newRewardToken.balanceOf(this.feeAddress))).to.be.greaterThan(0);
+    advanceTime(300);
+    advanceBlock();
+    advanceBlock();
+
+    await this.quickSwapDragonSyrupQuickStrategyInstance.rescueFunds(this.assetToken.address);
     await this.farmInstance.connect(this.depositor).emergencyWithdraw(0);
 
     userInfo = await this.farmInstance.userInfo(0, this.depositor.address);

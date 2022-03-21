@@ -32,6 +32,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     event SetYGNConverter(address indexed owner, address indexed ygnConverter);
     event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
+    event StrategySwitched(IStakingRewards newStakingRewardsContract, IERC20 newRewardToken);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
         require(addressToCheck != address(0), "No zero address");
@@ -125,7 +126,8 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     /**
      * @notice Updates the Staking Contract used by QuickSwap
      * @param _stakingRewardsContract Address of the Staking Contract
-     * @dev Only owner can call and update the Staking Contract address
+     * @dev Only owner can call and update the Staking Contract address.
+     * Make sure to use switch strategy instead
      */
     function updateQuickSwapStakingRewardsContract(IStakingRewards _stakingRewardsContract)
         external
@@ -154,6 +156,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
      * @notice Can be used by the owner to update the address for reward token
      * @param _rewardToken ERC20 address for the new reward token
      * @dev Only owner can call and update the rewardToken.
+     * Make sure to use switch strategy instead
      */
     function updateRewardToken(IERC20 _rewardToken)
         external
@@ -363,29 +366,32 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     }
 
     /* 
-        Requires new strategy contract to be whitelisted by current strategy.
-        Requires changing strategy address in farm.
+        Update Strategy Helper backend when you do this stuff
     */
     /**
-     * @notice function to withdraw all asset and transfer back to new strategy.
-     * @param _newStrategy Address of new strategy contract
+     * @notice function to withdraw all asset and deposit back to new staking rewards contract.
+     * @param _newStakingRewardsContract Address of new staking rewards contract
+     * @param _newRewardToken Address of the new reward token
      * @dev Can only be called by the owner
      */
-    function switchStrategy(IStrategy _newStrategy)
+    function switchStrategy(IStakingRewards _newStakingRewardsContract, IERC20 _newRewardToken)
         external
-        ensureNonZeroAddress(address(_newStrategy))
+        ensureNonZeroAddress(address(_newStakingRewardsContract))
+        ensureNonZeroAddress(address(_newRewardToken))
         onlyOwner
         nonReentrant
     {
-        updatePool();
+        require(isStrategyEnabled, "Strategy is disabled");
         uint256 totalLPStaked = getTotalLPStaked();
         require(totalLPStaked > 0, "No tokens staked");
-        _withdrawAsset(totalLPStaked);
+        updatePool();
+        uint256 withdrawnAmount = _withdrawAsset(totalLPStaked);
+        require(withdrawnAmount == totalLPStaked, "Unsuccessful strategy withdraw");
         require(asset.balanceOf(address(this)) >= totalLPStaked, "Unsuccessful strategy withdraw");
-        TransferHelper.safeApprove(address(asset), address(_newStrategy), totalLPStaked);
-        uint256 depositedAmount = _newStrategy.deposit(address(asset), totalLPStaked);
-        require(depositedAmount == totalLPStaked, "Invalid new strategy deposit");
-        emit StrategySwitched(IStrategy(address(this)), _newStrategy);
-        totalInputTokensStaked = 0;
+        stakingRewardsContract = _newStakingRewardsContract;
+        rewardToken = _newRewardToken;
+        uint256 depositedAmount = _depositAsset(totalLPStaked);
+        require(depositedAmount == totalLPStaked, "Invalid strategy deposit");
+        emit StrategySwitched(_newStakingRewardsContract, _newRewardToken);
     }
 }
