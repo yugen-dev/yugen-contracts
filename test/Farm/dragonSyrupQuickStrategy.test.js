@@ -66,7 +66,7 @@ describe("Yugen Farm Contract with QUICK Token", function () {
       true
     );
 
-    const depositor = "0xf977814e90da44bfa03b6295a0616a897441acec";
+    const depositor = "0x10855704d1Dde09d90C0D1afEe4E1e6626e45Bb7";
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [depositor],
@@ -272,8 +272,8 @@ describe("Yugen Farm Contract with QUICK Token", function () {
     //Deploying new strategy (This is also quick token dragon syrup strategy)
 
     //Bico Token
-    this.newRewardToken = this.ERC20Mock.attach("0x91c89A94567980f0e9723b487b0beD586eE96aa7");
-    this.newStakingRewardsContract = "0x5D474ddBb7da6275eB22fff06f28615F0B457c9d";
+    this.newRewardToken = this.ERC20Mock.attach("0x5314bA045a459f63906Aa7C76d9F337DcB7d6995");
+    this.newStakingRewardsContract = "0xFc80C8817405f7D7a345051a47EC457ED0080664";
 
     console.log(
       `New Reward Token is ${await this.newRewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -396,8 +396,8 @@ describe("Yugen Farm Contract with QUICK Token", function () {
     //Deploying new strategy (This is also quick token dragon syrup strategy)
 
     //Bico Token
-    this.newRewardToken = this.ERC20Mock.attach("0xB382C1cfA622795a534e5bd56Fac93d59BAc8B0D");
-    this.newStakingRewardsContract = "0xB68842d78ef33C2b327f863D0E0e293C81d7a243";
+    this.newRewardToken = this.ERC20Mock.attach("0xf4C83080E80AE530d6f8180572cBbf1Ac9D5d435");
+    this.newStakingRewardsContract = "0x834a43bb0e9a208139497ea9da005a7973903421";
 
     console.log(
       `New Reward Token is ${await this.newRewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`

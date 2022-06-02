@@ -9,7 +9,7 @@ const { advanceBlock, advanceTime } = require("../utilities/time");
 const QuickSwapDragonStrategyParams = require("../../scripts/quick_swap_dragon_syrup_strategy.json");
 const { parseEther } = require("ethers/lib/utils");
 
-describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract", function () {
+describe("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract", function () {
   before(async function () {
     this.signers = await ethers.getSigners();
     this.signer = this.signers[0];
@@ -64,7 +64,7 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
         true
       );
 
-    const depositor = "0xf977814e90da44bfa03b6295a0616a897441acec";
+    const depositor = "0x10855704d1Dde09d90C0D1afEe4E1e6626e45Bb7";
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [depositor],
@@ -297,8 +297,8 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
 
   it("should correctly switch strategy and deposit in new strategy", async function () {
     //Bico Token
-    this.rewardToken = this.ERC20Mock.attach("0xB382C1cfA622795a534e5bd56Fac93d59BAc8B0D");
-    this.stakingRewardsContract = "0xB68842d78ef33C2b327f863D0E0e293C81d7a243";
+    this.rewardToken = this.ERC20Mock.attach("0x5314bA045a459f63906Aa7C76d9F337DcB7d6995");
+    this.stakingRewardsContract = "0xFc80C8817405f7D7a345051a47EC457ED0080664";
 
     console.log(
       `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -433,8 +433,8 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
 
   it("should correctly switch strategy and deposit in new strategy", async function () {
     //Fuse Token
-    this.rewardToken = this.ERC20Mock.attach("0xF915fDDa4c882731C0456a4214548Cd13A822886");
-    this.stakingRewardsContract = "0xF2f0eadC00FE2009B64D5B735F0F06B45C502D15";
+    this.rewardToken = this.ERC20Mock.attach("0xf4C83080E80AE530d6f8180572cBbf1Ac9D5d435");
+    this.stakingRewardsContract = "0x834a43bb0e9a208139497ea9da005a7973903421";
 
     console.log(
       `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -469,8 +469,8 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
 
   it("should correctly switch strategy and deposit in new strategy", async function () {
     //Derc Token
-    this.rewardToken = this.ERC20Mock.attach("0xB35fcBCF1fD489fCe02Ee146599e893FDCdC60e6");
-    this.stakingRewardsContract = "0x09ecE0A8fF76AEa30d82480E8a89ec9fEeca9B0F";
+    this.rewardToken = this.ERC20Mock.attach("0x123706cDD8e60324e610E9A2CC7012D0F45A5b8E");
+    this.stakingRewardsContract = "0xec9db6f357917a88e223c6a88c2cbfc6f7d76a39";
 
     console.log(
       `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -496,8 +496,8 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
 
   it("should correctly switch strategy and deposit in new strategy", async function () {
     //kiro Token
-    this.rewardToken = this.ERC20Mock.attach("0xB382C1cfA622795a534e5bd56Fac93d59BAc8B0D");
-    this.stakingRewardsContract = "0xB68842d78ef33C2b327f863D0E0e293C81d7a243";
+    this.rewardToken = this.ERC20Mock.attach("0x146e58D34EaB0bFf7e0a63cfe9332908d680c667");
+    this.stakingRewardsContract = "0x21b3650931ac0b016d0377b606edc2cfd77ed84c";
 
     console.log(
       `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
@@ -523,172 +523,8 @@ describe.only("Forked Mainnet Testing - Dragon Syrup Pools - Yugen Farm Contract
 
   it("should correctly switch strategy and deposit in new strategy", async function () {
     //Derc Token
-    this.rewardToken = this.ERC20Mock.attach("0xdF7837DE1F2Fa4631D716CF2502f8b230F1dcc32");
-    this.stakingRewardsContract = "0xcC6Cc4e642c889742278CF302d5276E7eF498d66";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //kiro Token
-    this.rewardToken = this.ERC20Mock.attach("0xE8A05E85883F9663b18a38d7aa89853deaba56e3");
-    this.stakingRewardsContract = "0x297F1d28a886dBc513C43A3BC39Dd6F3c4969378";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  //qweqweqweqweqwewqw
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //Derc Token
-    this.rewardToken = this.ERC20Mock.attach("0x8d520c8E66091cfD6743fe37Fbe3A09505616C4b");
-    this.stakingRewardsContract = "0xA518cca4891e274DD85bDCc47ce8191bccA19854";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //kiro Token
-    this.rewardToken = this.ERC20Mock.attach("0xEe9A352F6aAc4aF1A5B9f467F6a93E0ffBe9Dd35");
-    this.stakingRewardsContract = "0x84dc01625a2ACAc0eb58776869e0F8BFb018D2fB";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //Derc Token
-    this.rewardToken = this.ERC20Mock.attach("0x3C1BB39bb696B443a1D80BB2b3a3d950Ba9DEE87");
-    this.stakingRewardsContract = "0xB7070622F36e01A8f1B0eCc14c41553965BdD053";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //kiro Token
-    this.rewardToken = this.ERC20Mock.attach("0x5CEeBB0947d58Fabde2fc026Ffe4B33ccFE1bA8B");
-    this.stakingRewardsContract = "0x5bF3A873F3ac58644df59B990E663810e212955f";
-
-    console.log(
-      `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`
-    );
-    //Calling Switch Strategy Flow
-
-    await this.quickSwapDragonSyrupQuickStrategyInstance
-      .connect(this.signer)
-      .switchStrategy(this.stakingRewardsContract, this.rewardToken.address);
-
-    const totalDepositAmount = parseEther("17");
-    let userInfo = await this.farmInstance.userInfo(this.newFarmPid, this.depositor.address);
-    let lpSupply = await this.farmInstance.getLpTokenAmount(this.newFarmPid);
-    let totalInputTokensStaked = (await this.farmInstance.poolInfo(this.newFarmPid))
-      .totalInputTokensStaked;
-    let totalInputTokensStakedInStrategy =
-      await this.quickSwapDragonSyrupQuickStrategyInstance.totalInputTokensStaked();
-    expect(userInfo.amount).to.equal(totalDepositAmount);
-    expect(lpSupply).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalDepositAmount);
-    expect(totalInputTokensStaked).to.equal(totalInputTokensStakedInStrategy);
-  });
-
-  it("should correctly switch strategy and deposit in new strategy", async function () {
-    //kiro Token
-    this.rewardToken = this.ERC20Mock.attach("0x2bC07124D8dAc638E290f401046Ad584546BC47b");
-    this.stakingRewardsContract = "0xeEf2D69bd3aeDd1bd770d67E9B9A3C58a1267e50";
+    this.rewardToken = this.ERC20Mock.attach("0x011734f6Ed20E8D011d85Cf7894814B897420acf");
+    this.stakingRewardsContract = "0x1e578d4f624a2ba8e697e0b834e48aca856184de";
 
     console.log(
       `New Reward Token is ${await this.rewardToken.symbol()} and Asset Token is ${await this.assetToken.symbol()}`

@@ -224,6 +224,9 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         pendingRewards = stakingRewardsContract.earnedA(address(this));
     }
 
+    /**
+     * @dev View function to see pending rewards by QUICK Swap Staking Contracts.
+     */
     function getStakingRewardsTokenB() public view returns (uint256 pendingRewards) {
         pendingRewards = stakingRewardsContract.earnedB(address(this));
     }
@@ -236,7 +239,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to claim dQUICK rewards
+     * @dev function to claim dQUICK and wmatic rewards
      */
     function _claimRewards() internal {
         stakingRewardsContract.getReward();
@@ -347,7 +350,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to withdraw asset from Quickswap Stakign Contract to strategy
+     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
      */
     function _withdrawAsset(uint256 _amountToWithdraw) internal returns (uint256 withdrawnAmount) {
         stakingRewardsContract.withdraw(_amountToWithdraw);
@@ -355,7 +358,7 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to withdraw asset from Qucikswap Staking Contract to strategy
+     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
      */
     function _emergencyWithdrawAsset() internal {
         stakingRewardsContract.exit();

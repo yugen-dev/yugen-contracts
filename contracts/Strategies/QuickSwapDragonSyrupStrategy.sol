@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "interfaces/IStakingRewards.sol";
-import "interfaces/IStrategy.sol";
 import "../libraries/TransferHelper.sol";
 
 contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
@@ -14,7 +13,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Address for address;
 
-    IERC20 public asset; //quick address which is used in stakingRewardsContract
+    IERC20 public asset; //new quick address which is used in stakingRewardsContract
     IERC20 public rewardToken; //the reward token UART etc.
     IStakingRewards public stakingRewardsContract; //StakingRewards contract of QuickSwap
     address public ygnConverter; // YGN Converter address
@@ -53,7 +52,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
 
     /**
      * @notice Creates a new QuickSwap DragonSyrup Strategy Contract
-     * @param _asset same which is used in stakingRewardsContract. This will quick token
+     * @param _asset same which is used in stakingRewardsContract. This will new quick token
      * @param _rewardToken reward token address
      * @param _stakingRewardsContract; staking rewards contract used by dragon syrup
      * @param _ygnConverter fee address for transferring residues and reward tokens
@@ -127,7 +126,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
      * @notice Updates the Staking Contract used by QuickSwap
      * @param _stakingRewardsContract Address of the Staking Contract
      * @dev Only owner can call and update the Staking Contract address.
-     * Make sure to use switch strategy instead
+     * Make sure to use switch strategy instead since it doesn't update reward token.
      */
     function updateQuickSwapStakingRewardsContract(IStakingRewards _stakingRewardsContract)
         external
@@ -156,7 +155,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
      * @notice Can be used by the owner to update the address for reward token
      * @param _rewardToken ERC20 address for the new reward token
      * @dev Only owner can call and update the rewardToken.
-     * Make sure to use switch strategy instead
+     * Make sure to use switch strategy instead since it doesn't update staking rewards contract.
      */
     function updateRewardToken(IERC20 _rewardToken)
         external
@@ -391,6 +390,7 @@ contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
         stakingRewardsContract = _newStakingRewardsContract;
         rewardToken = _newRewardToken;
         uint256 depositedAmount = _depositAsset(totalLPStaked);
+        totalLPStaked = getTotalLPStaked();
         require(depositedAmount == totalLPStaked, "Invalid strategy deposit");
         emit StrategySwitched(_newStakingRewardsContract, _newRewardToken);
     }
