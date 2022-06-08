@@ -393,8 +393,6 @@ contract PenroseFinanceStrategy is Ownable, ReentrancyGuard {
         nonReentrant
         returns (uint256 rescuedAssetAmount)
     {
-        updatePool();
-
         if (totalInputTokensStaked > 0) {
             _withdrawAsset(totalInputTokensStaked);
             rescuedAssetAmount = asset.balanceOf(address(this));
