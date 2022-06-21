@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity >=0.6.0;
 pragma experimental ABIEncoderV2;
 
-interface IDystRouter01 {
-    struct Route {
-        address from;
-        address to;
-        bool stable;
-    }
+import "./IRoute.sol";
 
+interface IDystRouter01 is IRoute {
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -26,4 +22,6 @@ interface IDystRouter01 {
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
+
+    function factory() external view returns (address);
 }
