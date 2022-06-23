@@ -378,6 +378,32 @@ describe.only("DystConverter Test Suite", function () {
       Number(usdcBalanceInYGNConverterAfterConvert) / 10 ** 6
     );
     expect(Number(usdcBalanceInYGNConverterAfterConvert)).to.be.greaterThan(0);
+
+    const ygnBalanceInYGNConverterBeforeConvert = await this.ygn.balanceOf(
+      this.universalConverterInstance.address
+    );
+    console.log(
+      "YGN Balance after in YGN Converter",
+      Number(ygnBalanceInYGNConverterBeforeConvert) / 10 ** 18
+    );
+
+    await this.universalConverterInstance.convertTokens();
+
+    const ygnBalanceInYGNConverterAfterConvert = await this.ygn.balanceOf(
+      this.universalConverterInstance.address
+    );
+    console.log(
+      "YGN Balance after in YGN Converter",
+      Number(ygnBalanceInYGNConverterAfterConvert) / 10 ** 18
+    );
+
+    const usdcBalanceInYGNConverterAfterAfterConvert = await this.usdc.balanceOf(
+      this.universalConverterInstance.address
+    );
+    console.log(
+      "USDC Balance after in YGN Converter",
+      Number(usdcBalanceInYGNConverterAfterAfterConvert) / 10 ** 6
+    );
   });
 
   //rescue USD+
