@@ -8,7 +8,7 @@ const ConstructorParams = require("../../scripts/dyst_converter.json");
 const { getBigNumber } = require("../utilities/index");
 
 //Test cases based on forked mainnet testing
-describe.only("DystConverter Test Suite", function () {
+describe("DystConverter Test Suite", function () {
   before(async function () {
     this.signers = await ethers.getSigners();
     this.signer = this.signers[0];

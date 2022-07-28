@@ -1,0 +1,8 @@
+{
+  "farm": "0xe713DaAa96035982bf01F041c2BB248B5E07882a",
+  "universalOneSidedFarm": "0x2e4ae5adec4a31afbdb9cce96255a77a7875c252",
+  "quickswapRouter": "0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff",
+  "quickswapLP": "0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7",
+  "token": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+  "secondaryToken": "0xfe4546feFe124F30788c4Cc1BB9AA6907A7987F9"
+}
