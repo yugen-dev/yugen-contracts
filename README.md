@@ -26,21 +26,18 @@ Farm tokens from the Yield Farming project are used to buy $YGN tokens, which ar
 
 - Clone Project Codebase
 
-This will setup the codebase in your local.
 ```
 git clone https://github.com/yugen-dev/yugen-contracts.git
 ```
 
 - Install dependencies
 
-This will install the required dependencies.
 ```
 yarn
 ```
 
 - Compile
 
-This will compile all the smart contracts.
 ```
 yarn run compile
 ```
