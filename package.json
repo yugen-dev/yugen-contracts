@@ -37,6 +37,7 @@
     "deploy_farm_wrapper:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deploy_farm_wrapper.js",
     "deployYGN:ethereum": "HARDHAT_NETWORK=eth_mainnet npx hardhat run scripts/deploy/deploy_ygn.js",
     "deployQuickDualFarms:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_quickswap_farms_dual.js",
+    "deployQuickFarmsStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_quickswap_farm_strategy.js",
     "deploySushiSwapStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_sushiswap_strategy.js",
     "deployCafeSwapStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_cafeswap.js",
     "deployEthalendUSDTVault:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/ethalend-vaults/deployEthalendUSDTVault.js",
@@ -45,7 +46,12 @@
     "deployLiquidityMigratorV1:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
     "deployLiquidityMigratorV1:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployLiquidityMigratorV1.js",
     "deployConverterHelper:test": "HARDHAT_NETWORK=mumbai npx hardhat run scripts/deploy/deployConverterHelper.js",
-    "deployConverterHelper:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployConverterHelper.js"
+    "deployConverterHelper:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployConverterHelper.js",
+    "deploy_ftm_wrapper:main": "HARDHAT_NETWORK=fantom_mainnet npx hardhat run scripts/deploy/fantom/deployFTMWrapper.js",
+    "deploy_ftm_wrapper:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/deployFTMWrapper.js",
+    "deploy_tarot_supply_vault_strategy:main": "HARDHAT_NETWORK=fantom_mainnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js",
+    "deploy_tarot_supply_vault_strategy:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js",
+    "executeConverter:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/executeConverter.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

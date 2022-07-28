@@ -1,0 +1,21 @@
+{
+  "supplyVaultRouter": "0x3e9f34309b2f046f4f43c0376efe2fdc27a10251",
+  "ygnConverter": "",
+  "farm": "",
+  "FTM": {
+    "asset": "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
+    "supplyVault": "0x0defef0c977809db8c1a3f13fd8dacbd565d968e"
+  },
+  "USDC": {
+    "asset": "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75",
+    "supplyVault": "0x68d211bc1e66814575d89bbe4f352b4cdbdacdfb"
+  },
+  "ETH": {
+    "asset": "0x74b23882a30290451A17c44f4F05243b6b58C76d",
+    "supplyVault": "0x4f56f5e76c91e3676e806eb1b2e00e1d18f8f897"
+  },
+  "BTC": {
+    "asset": "0x321162Cd933E2Be498Cd2267a90534A804051b11",
+    "supplyVault": "0xa45776cd3bd348c330bce66bf9dba149d8c3d452"
+  }
+}
