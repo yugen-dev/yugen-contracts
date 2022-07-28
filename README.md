@@ -3,7 +3,7 @@
 
 <img width="1432" alt="Yugen Dapp" src="https://user-images.githubusercontent.com/47684949/181538183-43f3f637-d387-4510-82a9-395206c1be3b.png">
 
-### [Website](https://yugen.finance/) | [Yugen App](https://app.yugen.finance/) | [Twitter](https://twitter.com/YugenFinance_) | [Telegram](https://t.me/YugenFinance) | [Instagram](https://www.instagram.com/yugenfinance/) | [Medium](https://blog.yugen.finance/)| [Discord](https://discord.gg/USXYEte)
+### [Website](https://yugen.finance/) | [Yugen App](https://app.yugen.finance/) | [Twitter](https://twitter.com/YugenFinance_) | [Telegram](https://t.me/YugenFinance) | [Instagram](https://www.instagram.com/yugenfinance/) | [Medium](https://blog.yugen.finance/) | [Discord](https://discord.gg/USXYEte)
 
 **Yugen Finance** is a DeFi-Yield aggregator that generates money by aggregating income from various initiatives. 
 The platform also comes with a basic app that can be used on both desktop and mobile platforms. 
