@@ -1,4 +1,4 @@
-## Yugen Finance | YGN (⛩,⛩)
+## Yugen Finance Smart Contracts | YGN (⛩,⛩)
 
 
 <img width="1432" alt="Yugen Dapp" src="https://user-images.githubusercontent.com/47684949/181538183-43f3f637-d387-4510-82a9-395206c1be3b.png">
@@ -22,26 +22,27 @@ Farm tokens from the Yield Farming project are used to buy $YGN tokens, which ar
 
 - [Immunefi Bug Bounty Program](https://immunefi.com/bounty/yugen/)
 
+## Steps to setup this project.
 
-### Install dependencies
+- Clone Project Codebase
 
-This will install the required dpen
+This will setup the codebase in your local.
+```
+git clone https://github.com/yugen-dev/yugen-contracts.git
+```
 
+- Install dependencies
+
+This will install the required dependencies.
 ```
 yarn
 ```
 
-### Compile
+- Compile
 
+This will compile all the smart contracts.
 ```
 yarn run compile
-```
-
-
-### Test
-
-```
-yarn run test
 ```
 
 ### Mainnet Deployed Contracts
