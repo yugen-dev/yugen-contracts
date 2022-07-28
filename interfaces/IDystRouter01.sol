@@ -24,4 +24,28 @@ interface IDystRouter01 is IRoute {
     ) external returns (uint256[] memory amounts);
 
     function factory() external view returns (address);
+
+    function getAmountOut(
+        uint256 amountIn,
+        address tokenIn,
+        address tokenOut
+    ) external view returns (uint256 amount, bool stable);
+
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        bool stable,
+        uint256 amountADesired,
+        uint256 amountBDesired,
+        uint256 amountAMin,
+        uint256 amountBMin,
+        address to,
+        uint256 deadline
+    )
+        external
+        returns (
+            uint256 amountA,
+            uint256 amountB,
+            uint256 liquidity
+        );
 }

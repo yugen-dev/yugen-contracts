@@ -4,17 +4,17 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const ConstructorParams = require("../nacho_xyz_eth_strategy.json");
+const ConstructorParams = require("../farm_wrapper.json");
 
 async function main() {
   const FarmWrapper = await hre.ethers.getContractFactory("FarmWrapper");
   const farmWrapperInstance = await FarmWrapper.deploy(
+    ConstructorParams.farm,
     ConstructorParams.universalOneSidedFarm,
-    ConstructorParams.nachoLP,
-    ConstructorParams.quickSwapRouter,
-    ConstructorParams.asset,
-    ConstructorParams.secondaryAsset,
-    ConstructorParams.farm
+    ConstructorParams.quickswapRouter,
+    ConstructorParams.quickswapLP,
+    ConstructorParams.token,
+    ConstructorParams.secondaryToken
   );
   await farmWrapperInstance.deployed();
   console.log("Farm wrapper deployed at " + farmWrapperInstance.address);
@@ -22,14 +22,13 @@ async function main() {
 
   await hre.run("verify:verify", {
     address: farmWrapperInstance.address,
-    contract: "FarmWrapper",
     constructorArguments: [
+      ConstructorParams.farm,
       ConstructorParams.universalOneSidedFarm,
-      ConstructorParams.nachoLP,
-      ConstructorParams.quickSwapRouter,
-      ConstructorParams.asset,
-      ConstructorParams.secondaryAsset,
-      ConstructorParams.farm
+      ConstructorParams.quickswapRouter,
+      ConstructorParams.quickswapLP,
+      ConstructorParams.token,
+      ConstructorParams.secondaryToken,
     ],
   });
 }

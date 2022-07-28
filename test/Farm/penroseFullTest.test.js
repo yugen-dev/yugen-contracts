@@ -11,7 +11,7 @@ const { parseEther } = require("ethers/lib/utils");
 
 const FYGN_PER_BLOCK = "1000000000000000000";
 
-describe.only("Yugen Farm Contract - Penrose Strategy", function () {
+describe("Yugen Farm Contract - Penrose Strategy", function () {
   before(async function () {
     this.signers = await ethers.getSigners();
     this.signer = this.signers[0];
@@ -159,13 +159,13 @@ describe.only("Yugen Farm Contract - Penrose Strategy", function () {
   });
 
   it("should correctly deposit and withdraw in penrose rewards farms", async function () {
-    let user = "0x9baCEc26542a3652A131aff8aE10Bd0787CFed1A";
+    let user = "0x23e817b3982ba0e033dab4fa1b47088418ad6b2a";
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [user],
     });
     const signer = await ethers.getSigner(user);
-    const depositAmount = parseEther("0.000001");
+    const depositAmount = parseEther("0.0000000001");
 
     console.log("depositAmount ", String(depositAmount));
     await this.asset.connect(signer).approve(this.farmInstance.address, MaxUint256);
