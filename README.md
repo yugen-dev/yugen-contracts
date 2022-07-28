@@ -90,8 +90,8 @@ yarn run compile
 | Quickswap dual rewards (cxETH-Weth)| [0x4Ab6Eee99d424298C79e86e1c8E6075123D98050](https://polygonscan.com/address/0x4Ab6Eee99d424298C79e86e1c8E6075123D98050#code) |
 | Quickswap Dragon Syrup Pools| [0xA4E14F2F10FD6EE037c48E882Ab42ACEbbB75CE0](https://polygonscan.com/address/0xA4E14F2F10FD6EE037c48E882Ab42ACEbbB75CE0#code) |
 | Quickswap dual rewards (cxBTC-wBTC)| [0xceda25cFAE93Bb90ca78Ea1C592972eEEf334d85](https://polygonscan.com/address/0xceda25cFAE93Bb90ca78Ea1C592972eEEf334d85#code) |
-| Penrose (USD+-USDC| [0xcd012F59BD9ABed06786EB0Da3dB0C599d07236b](https://polygonscan.com/address/0xcd012F59BD9ABed06786EB0Da3dB0C599d07236b#code) |
-| Penrose (FRAX-MAI)| [0x8bcb75e56080f69af264C496A98587a1677D1778](https://polygonscan.com/address/0x8bcb75e56080f69af264C496A98587a1677D1778#code) |
-| Penrose (USDC-FRAX)| [0xf66493d2b8FFBe857B6282D632B683Ee3dBD88c0](https://polygonscan.com/address/0xf66493d2b8FFBe857B6282D632B683Ee3dBD88c0#code) |
-| Penrose (DYST-WMATIC)| [0xA741d353BBcdcF2e801F707E512829153f2b6AC8](https://polygonscan.com/address/0xA741d353BBcdcF2e801F707E512829153f2b6AC8#code) |
-| Penrose (USDC-USDT)| [0x50371fD3745AD70eECD0AC96933571AA78C3e5fc](https://polygonscan.com/address/0x50371fD3745AD70eECD0AC96933571AA78C3e5fc#code) |
+| Penrose Finance (USD+-USDC) | [0xcd012F59BD9ABed06786EB0Da3dB0C599d07236b](https://polygonscan.com/address/0xcd012F59BD9ABed06786EB0Da3dB0C599d07236b#code) |
+| Penrose Finance (FRAX-MAI)| [0x8bcb75e56080f69af264C496A98587a1677D1778](https://polygonscan.com/address/0x8bcb75e56080f69af264C496A98587a1677D1778#code) |
+| Penrose Finance (USDC-FRAX)| [0xf66493d2b8FFBe857B6282D632B683Ee3dBD88c0](https://polygonscan.com/address/0xf66493d2b8FFBe857B6282D632B683Ee3dBD88c0#code) |
+| Penrose Finance (DYST-WMATIC)| [0xA741d353BBcdcF2e801F707E512829153f2b6AC8](https://polygonscan.com/address/0xA741d353BBcdcF2e801F707E512829153f2b6AC8#code) |
+| Penrose Finance (USDC-USDT)| [0x50371fD3745AD70eECD0AC96933571AA78C3e5fc](https://polygonscan.com/address/0x50371fD3745AD70eECD0AC96933571AA78C3e5fc#code) |
