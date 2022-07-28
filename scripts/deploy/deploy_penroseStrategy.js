@@ -19,7 +19,7 @@ async function main() {
     PenroseStrategyParams.dystRouter
   );
   await penroseStrategyInstance.deployed();
-  console.log("QuickSwap Dragon Strategy deployed at " + penroseStrategyInstance.address);
+  console.log("Penrose Strategy deployed at " + penroseStrategyInstance.address);
   await penroseStrategyInstance.deployTransaction.wait([(confirms = 6)]);
 
   await hre.run("verify:verify", {
