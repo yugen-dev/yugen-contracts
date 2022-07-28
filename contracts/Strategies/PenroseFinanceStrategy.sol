@@ -5,33 +5,39 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "interfaces/IStakingRewards.sol";
-import "interfaces/IDQuick.sol";
+import "interfaces/IUserProxy.sol";
+import "interfaces/IDystRouter01.sol";
 import "../libraries/TransferHelper.sol";
 
-contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
+contract PenroseFinanceStrategy is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using Address for address;
 
-    IERC20 public asset; //quickSwapLP address which is used in stakingRewardsContract
-    IERC20 public rewardA; //dquick token
-    IERC20 public rewardB; //wmatic token
-    IERC20 public quickTokenAddress; //quick token
-    IStakingRewards public stakingRewardsContract; //StakingRewards contract of QuickSwap
-    address public ygnConverter; // YGN Converter address
+    IERC20 public asset; //DystopiaLP address
+    IERC20 public rewardA; //DYST token
+    IERC20 public rewardB; //PEN token
+    IUserProxy public userProxyInterfaceContract; //UserProxy Interface Contract contract of Penrose Finance
+    address public ygnConverter; // YGN Converter address to receive DYST
+    address public treasury; //Treasury Address to receive PEN
     address public farm; //Farm Address
+    IDystRouter01 public dystRouter; //Router used to swap dyst to wmatic
 
+    uint256 private constant DEADLINE =
+        0xf000000000000000000000000000000000000000000000000000000000000000;
+    address public constant wmatic = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     uint256 public strategyWithdrawalFeeBP = 0;
     uint256 public strategyDepositFeeBP = 0;
     uint256 public totalInputTokensStaked = 0;
 
-    bool public supportsEmergencyWithdraw = true;
+    bool public supportsEmergencyWithdraw = false;
     bool public isStrategyEnabled = true;
+    bool public convertDyst = true;
     // whitelisted liquidityHolders
     mapping(address => bool) public liquidityHolders;
 
     event SetYGNConverter(address indexed owner, address indexed ygnConverter);
+    event SetTreasury(address indexed owner, address indexed treasury);
     event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
 
@@ -53,33 +59,37 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Creates a new QuickSwap Strategy Contract
-     * @param _asset same which is used in stakingRewardsContract
-     * @param _rewardA dQUICK token address
-     * @param _rewardB wmatic token address
-     * @param _quickTokenAddress Quick token address
-     * @param _stakingRewardsContract; staking rewards contract used by quickSwapLP
-     * @param _ygnConverter fee address for transferring residues and reward tokens
+     * @notice Creates a new PenroseFinance Strategy Contract
+     * @param _asset Dystopia LP address
+     * @param _rewardA DYST token address
+     * @param _rewardB PEN token address
+     * @param _userProxyInterfaceContract UserProxy Interface Contract contract of Penrose Finance
+     * @param _ygnConverter fee address for transferring residues and reward tokens (DYST)
+     * @param _treasury treasury Address to receive PEN
      * @param _farm Farm Address that deposits into this strategy
+     * @param _dystRouter Router used to swap dyst to wmatic
      * @dev deployer of contract is set as owner
      */
     constructor(
         IERC20 _asset,
         IERC20 _rewardA,
         IERC20 _rewardB,
-        IERC20 _quickTokenAddress,
-        IStakingRewards _stakingRewardsContract,
+        IUserProxy _userProxyInterfaceContract,
         address _ygnConverter,
-        address _farm
+        address _treasury,
+        address _farm,
+        IDystRouter01 _dystRouter
     ) {
         asset = _asset;
         rewardA = _rewardA;
         rewardB = _rewardB;
-        quickTokenAddress = _quickTokenAddress;
-        stakingRewardsContract = _stakingRewardsContract;
+        userProxyInterfaceContract = _userProxyInterfaceContract;
         ygnConverter = _ygnConverter;
+        treasury = _treasury;
         farm = _farm;
         liquidityHolders[_farm] = true;
+        dystRouter = _dystRouter;
+        TransferHelper.safeApprove(address(rewardA), address(dystRouter), uint256(-1));
     }
 
     function updateLiquidityHolder(address _liquidityHolder, bool _status)
@@ -99,6 +109,15 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
      */
     function updateStrategyMode(bool _isStrategyEnabled) external onlyOwner nonReentrant {
         isStrategyEnabled = _isStrategyEnabled;
+    }
+
+    /**
+     * @notice Updates the Convert Dyst flag for the strategy
+     * @param _convertDyst bool flag to enable/disable conversion of dyst to wmatic
+     * @dev Only owner can call and update this mode
+     */
+    function updateConvertDystMode(bool _convertDyst) external onlyOwner nonReentrant {
+        convertDyst = _convertDyst;
     }
 
     /**
@@ -131,23 +150,37 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Updates the Staking Contract used by QuickSwap
-     * @param _stakingRewardsContract Address of the Staking Contract
-     * @dev Only owner can call and update the Staking Contract address
+     * @notice Updates the DystRouter Contract used for swaps
+     * @param _dystRouter Address of the Dystopia Exchange Router
+     * @dev Only owner can call and update the DystRouter Contract address
      */
-    function updateQuickSwapStakingRewardsContract(IStakingRewards _stakingRewardsContract)
+    function updateDystRouter(IDystRouter01 _dystRouter)
         external
         onlyOwner
         nonReentrant
-        ensureNonZeroAddress(address(_stakingRewardsContract))
+        ensureNonZeroAddress(address(_dystRouter))
     {
-        stakingRewardsContract = _stakingRewardsContract;
+        dystRouter = _dystRouter;
     }
 
     /**
-     * @notice Updates the QuickSwap LP Token Address.
-     * @param _asset Address of the QuickSwap LP
-     * @dev Only owner can call and update the QuickSwap LP address
+     * @notice Updates the UserProxy Interface Contract used by Penrose Finance
+     * @param _userProxyInterfaceContract Address of the UserProxy Interface Contract
+     * @dev Only owner can call and update the UserProxy Interface Contract address
+     */
+    function updateUserProxyInterfaceContract(IUserProxy _userProxyInterfaceContract)
+        external
+        onlyOwner
+        nonReentrant
+        ensureNonZeroAddress(address(_userProxyInterfaceContract))
+    {
+        userProxyInterfaceContract = _userProxyInterfaceContract;
+    }
+
+    /**
+     * @notice Updates the Dystopia LP Token Address.
+     * @param _asset Address of the Dystopia LP
+     * @dev Only owner can call and update the Dystopia LP address
      */
     function updateAsset(IERC20 _asset)
         external
@@ -186,6 +219,17 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         emit SetYGNConverter(_msgSender(), _ygnConverter);
     }
 
+    // Update Treasury
+    function setTreasury(address _treasury)
+        external
+        onlyOwner
+        nonReentrant
+        ensureNonZeroAddress(_treasury)
+    {
+        treasury = _treasury;
+        emit SetTreasury(_msgSender(), _treasury);
+    }
+
     /**
      * @notice transfer accumulated asset. Shouldn't be called since this will transfer community's residue asset to ygnConverter
      * @dev Only owner can call and claim the assets residue
@@ -206,90 +250,70 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         updatePool();
 
         uint256 rewardARewards = rewardA.balanceOf(address(this));
-
-        IDQuick(address(rewardA)).leave(rewardARewards);
-
-        uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
-
-        TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
+        if (rewardARewards > 0) {
+            if (convertDyst) {
+                dystRouter.swapExactTokensForTokensSimple(
+                    rewardARewards,
+                    1,
+                    address(rewardA),
+                    address(wmatic),
+                    false,
+                    ygnConverter,
+                    DEADLINE
+                );
+            } else {
+                TransferHelper.safeTransfer(address(rewardA), ygnConverter, rewardARewards);
+            }
+        }
 
         uint256 rewardBRewards = rewardB.balanceOf(address(this));
-        TransferHelper.safeTransfer(address(rewardB), ygnConverter, rewardBRewards);
+        if (rewardBRewards > 0) {
+            TransferHelper.safeTransfer(address(rewardB), treasury, rewardBRewards);
+        }
     }
 
     /**
-     * @dev View function to see pending rewards by QUICK Swap Staking Contracts.
-     */
-    function getStakingRewardsTokenA() public view returns (uint256 pendingRewards) {
-        pendingRewards = stakingRewardsContract.earnedA(address(this));
-    }
-
-    /**
-     * @dev View function to see pending rewards by QUICK Swap Staking Contracts.
-     */
-    function getStakingRewardsTokenB() public view returns (uint256 pendingRewards) {
-        pendingRewards = stakingRewardsContract.earnedB(address(this));
-    }
-
-    /**
-     * @dev View function to get total LP staked in Staking Contracts.
-     */
-    function getTotalLPStaked() public view returns (uint256 totalLPStaked) {
-        totalLPStaked = stakingRewardsContract.balanceOf(address(this));
-    }
-
-    /**
-     * @dev function to claim dQUICK and wmatic rewards
+     * @dev function to claim DYST and PEN rewards
      */
     function _claimRewards() internal {
-        stakingRewardsContract.getReward();
-    }
-
-    /**
-     * @notice View function to see pending rewards on frontend.
-     */
-    function getPendingRewards()
-        external
-        view
-        returns (uint256 pendingRewardsA, uint256 pendingRewardsB)
-    {
-        pendingRewardsA = getStakingRewardsTokenA();
-        pendingRewardsB = getStakingRewardsTokenB();
+        userProxyInterfaceContract.claimStakingRewards();
     }
 
     /**
      * @notice Update reward variables of the pool to be up-to-date. This also claims the rewards generated from staking
      */
     function updatePool() public {
-        uint256 totalLPStaked = getTotalLPStaked();
-        if (totalLPStaked == 0) {
+        if (totalInputTokensStaked == 0) {
             return;
         }
 
-        uint256 pendingRewardsA = getStakingRewardsTokenA();
-        uint256 pendingRewardsB = getStakingRewardsTokenB();
+        _claimRewards();
 
-        if (pendingRewardsA > 0 || pendingRewardsB > 0) {
-            _claimRewards();
-        } else {
-            // when no rewards are present
-            return;
+        uint256 rewardARewards = rewardA.balanceOf(address(this));
+        if (rewardARewards > 0) {
+            if (convertDyst) {
+                dystRouter.swapExactTokensForTokensSimple(
+                    rewardARewards,
+                    1,
+                    address(rewardA),
+                    address(wmatic),
+                    false,
+                    ygnConverter, //wmatic directly goes to ygn convertor
+                    DEADLINE
+                );
+            } else {
+                TransferHelper.safeTransfer(address(rewardA), ygnConverter, rewardARewards);
+            }
         }
-        // rewardAmountA
-        uint256 rewardAmountA = rewardA.balanceOf(address(this));
 
-        IDQuick(address(rewardA)).leave(rewardAmountA);
-
-        uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
-
-        TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
-
-        uint256 rewardTokenRewardsB = rewardB.balanceOf(address(this));
-        TransferHelper.safeTransfer(address(rewardB), ygnConverter, rewardTokenRewardsB);
+        uint256 rewardBRewards = rewardB.balanceOf(address(this));
+        if (rewardBRewards > 0) {
+            TransferHelper.safeTransfer(address(rewardB), treasury, rewardBRewards);
+        }
     }
 
     /**
-     * @notice function to deposit asset to quickswap farms.
+     * @notice function to deposit asset to Penrose/Dystopia pools.
      * @param _token Address of the token. (Should be the same as the asset token)
      * @param _amount amount of asset token deposited.
      * @dev Can only be called from the liquidity manager
@@ -316,16 +340,16 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to deposit asset from strategy to Quickswap Staking Contract.
+     * @dev function to deposit asset from strategy to Penrose/Dystopia.
      */
     function _depositAsset(uint256 _amount) internal returns (uint256 depositedAmount) {
-        TransferHelper.safeApprove(address(asset), address(stakingRewardsContract), _amount);
-        stakingRewardsContract.stake(_amount);
+        TransferHelper.safeApprove(address(asset), address(userProxyInterfaceContract), _amount);
+        userProxyInterfaceContract.depositLpAndStake(address(asset), _amount);
         depositedAmount = _amount;
     }
 
     /**
-     * @notice function to withdraw asset from quickswap farms.
+     * @notice function to withdraw asset from Penrose/Dystopia.
      * @param _token Address of the token. (Should be the same as the asset token)
      * @param _amount amount of asset token the user wants to withdraw.
      * @dev Can only be called from the liquidity manager
@@ -350,18 +374,11 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
+     * @dev function to withdraw asset from Penrose/Dystopia to strategy
      */
     function _withdrawAsset(uint256 _amountToWithdraw) internal returns (uint256 withdrawnAmount) {
-        stakingRewardsContract.withdraw(_amountToWithdraw);
+        userProxyInterfaceContract.unstakeLpAndWithdraw(address(asset), _amountToWithdraw);
         withdrawnAmount = _amountToWithdraw;
-    }
-
-    /**
-     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
-     */
-    function _emergencyWithdrawAsset() internal {
-        stakingRewardsContract.exit();
     }
 
     /**
@@ -376,15 +393,8 @@ contract QuickSwapFarmsStrategyDual is Ownable, ReentrancyGuard {
         nonReentrant
         returns (uint256 rescuedAssetAmount)
     {
-        updatePool();
-        uint256 totalLPStaked = getTotalLPStaked();
-
-        if (totalLPStaked > 0) {
-            if (supportsEmergencyWithdraw) {
-                _emergencyWithdrawAsset();
-            } else {
-                _withdrawAsset(totalLPStaked);
-            }
+        if (totalInputTokensStaked > 0) {
+            _withdrawAsset(totalInputTokensStaked);
             rescuedAssetAmount = asset.balanceOf(address(this));
             emit RescueAsset(msg.sender, rescuedAssetAmount);
             isStrategyEnabled = false;

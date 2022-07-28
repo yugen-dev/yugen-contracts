@@ -51,7 +51,11 @@
     "deploy_ftm_wrapper:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/deployFTMWrapper.js",
     "deploy_tarot_supply_vault_strategy:main": "HARDHAT_NETWORK=fantom_mainnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js",
     "deploy_tarot_supply_vault_strategy:test": "HARDHAT_NETWORK=fantom_testnet npx hardhat run scripts/deploy/fantom/tarot/deployTarotSupplyVaultStrategy.js",
-    "deployQuickSwapDragonStrategy:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/dragonSyrupQuickStrategy.test.js"
+    "deployQuickSwapDragonStrategy:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_quickswapDragonSyrup_strategy.js",
+    "executeConverter": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/executeConverter.js",
+    "deployPenroseStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_penroseStrategy.js",
+    "deployDystConverter:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployDystConverter.js",
+    "deploySingleSidedLiquidityV2:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploySingleSidedLiquidityV2.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
