@@ -1,9 +1,9 @@
 {
-  "asset":"0x019ba0325f1988213D448b3472fA1cf8D07618d7",
-  "rewardTokenA":"0xf28164A485B0B2C90639E47b0f377b4a438a16B1",
-  "rewardTokenB":"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-  "quickTokenAddress":"0x831753DD7087CaC61aB5644b308642cc1c33Dc13",
-  "stakingRewardsContract":"0xd26E16f5a9dfb9Fe32dB7F6386402B8AAe1a5dd7",
-  "ygnConverter":"",
-  "farm":""
+  "asset": "0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7",
+  "rewardTokenA": "0xf28164A485B0B2C90639E47b0f377b4a438a16B1",
+  "rewardTokenB": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+  "quickTokenAddress": "0x831753DD7087CaC61aB5644b308642cc1c33Dc13",
+  "stakingRewardsContract": "0xD8F0af6c455e09c44d134399eD1DF151043840E6",
+  "ygnConverter": "0x1188772c9810CfECAc6c35fFdE41A710983b01Ec",
+  "farm": "0xe713DaAa96035982bf01F041c2BB248B5E07882a"
 }

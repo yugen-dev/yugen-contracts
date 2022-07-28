@@ -6,17 +6,16 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "interfaces/IStakingRewards.sol";
-import "interfaces/IDQuick.sol";
+import "interfaces/IStrategy.sol";
 import "../libraries/TransferHelper.sol";
 
-contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
+contract QuickSwapDragonSyrupStrategy is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using Address for address;
 
-    IERC20 public asset; //quickSwapLP address which is used in stakingRewardsContract
-    IERC20 public rewardToken; //dquick token
-    IERC20 public quickTokenAddress; //quick token
+    IERC20 public asset; //quick address which is used in stakingRewardsContract
+    IERC20 public rewardToken; //the reward token UART etc.
     IStakingRewards public stakingRewardsContract; //StakingRewards contract of QuickSwap
     address public ygnConverter; // YGN Converter address
     address public farm; //Farm Address
@@ -33,6 +32,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     event SetYGNConverter(address indexed owner, address indexed ygnConverter);
     event RescueAsset(address owner, uint256 rescuedAssetAmount);
     event LiquidityHolderStatus(address liquidityHolder, bool status);
+    event StrategySwitched(IStakingRewards newStakingRewardsContract, IERC20 newRewardToken);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
         require(addressToCheck != address(0), "No zero address");
@@ -52,13 +52,12 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Creates a new QuickSwap Strategy Contract
-     * @param _asset same which is used in stakingRewardsContract
-     * @param _rewardToken dQUICK token address
-     * @param _stakingRewardsContract; staking rewards contract used by quickSwapLP
+     * @notice Creates a new QuickSwap DragonSyrup Strategy Contract
+     * @param _asset same which is used in stakingRewardsContract. This will quick token
+     * @param _rewardToken reward token address
+     * @param _stakingRewardsContract; staking rewards contract used by dragon syrup
      * @param _ygnConverter fee address for transferring residues and reward tokens
      * @param _farm Farm Address that deposits into this strategy
-     * @param _quickTokenAddress Quick token address
      * @dev deployer of contract is set as owner
      */
     constructor(
@@ -66,15 +65,13 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
         IERC20 _rewardToken,
         IStakingRewards _stakingRewardsContract,
         address _ygnConverter,
-        address _farm,
-        IERC20 _quickTokenAddress
+        address _farm
     ) {
         asset = _asset;
         rewardToken = _rewardToken;
         stakingRewardsContract = _stakingRewardsContract;
         ygnConverter = _ygnConverter;
         farm = _farm;
-        quickTokenAddress = _quickTokenAddress;
         liquidityHolders[_farm] = true;
     }
 
@@ -129,7 +126,8 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     /**
      * @notice Updates the Staking Contract used by QuickSwap
      * @param _stakingRewardsContract Address of the Staking Contract
-     * @dev Only owner can call and update the Staking Contract address
+     * @dev Only owner can call and update the Staking Contract address.
+     * Make sure to use switch strategy instead
      */
     function updateQuickSwapStakingRewardsContract(IStakingRewards _stakingRewardsContract)
         external
@@ -158,6 +156,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
      * @notice Can be used by the owner to update the address for reward token
      * @param _rewardToken ERC20 address for the new reward token
      * @dev Only owner can call and update the rewardToken.
+     * Make sure to use switch strategy instead
      */
     function updateRewardToken(IERC20 _rewardToken)
         external
@@ -198,12 +197,9 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     function transferRewardTokenRewards() external onlyOwner nonReentrant {
         updatePool();
         uint256 rewardTokenRewards = rewardToken.balanceOf(address(this));
-
-        IDQuick(address(rewardToken)).leave(rewardTokenRewards);
-
-        uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
-
-        TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
+        if (rewardTokenRewards > 0) {
+            TransferHelper.safeTransfer(address(rewardToken), ygnConverter, rewardTokenRewards);
+        }
     }
 
     /**
@@ -221,7 +217,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to claim dQUICK rewards
+     * @dev function to claim reward token rewards
      */
     function _claimRewards() internal {
         stakingRewardsContract.getReward();
@@ -251,11 +247,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
             return;
         }
         uint256 rewardTokenRewards = rewardToken.balanceOf(address(this));
-
-        IDQuick(address(rewardToken)).leave(rewardTokenRewards);
-
-        uint256 quickTokenAmount = quickTokenAddress.balanceOf(address(this));
-        TransferHelper.safeTransfer(address(quickTokenAddress), ygnConverter, quickTokenAmount);
+        TransferHelper.safeTransfer(address(rewardToken), ygnConverter, rewardTokenRewards);
     }
 
     /**
@@ -320,7 +312,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to withdraw asset from Quickswap Stakign Contract to strategy
+     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
      */
     function _withdrawAsset(uint256 _amountToWithdraw) internal returns (uint256 withdrawnAmount) {
         stakingRewardsContract.withdraw(_amountToWithdraw);
@@ -328,7 +320,7 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev function to withdraw asset from Qucikswap Staking Contract to strategy
+     * @dev function to withdraw asset from Quickswap Staking Contract to strategy
      */
     function _emergencyWithdrawAsset() internal {
         stakingRewardsContract.exit();
@@ -371,5 +363,35 @@ contract QuickSwapFarmsStrategy is Ownable, ReentrancyGuard {
             ? totalInputTokensStaked
             : totalBalance;
         withdrawableAmount = _amount.mul(totalAmount).div(totalInputTokensStaked);
+    }
+
+    /* 
+        Update Strategy Helper backend when you do this stuff
+    */
+    /**
+     * @notice function to withdraw all asset and deposit back to new staking rewards contract.
+     * @param _newStakingRewardsContract Address of new staking rewards contract
+     * @param _newRewardToken Address of the new reward token
+     * @dev Can only be called by the owner
+     */
+    function switchStrategy(IStakingRewards _newStakingRewardsContract, IERC20 _newRewardToken)
+        external
+        ensureNonZeroAddress(address(_newStakingRewardsContract))
+        ensureNonZeroAddress(address(_newRewardToken))
+        onlyOwner
+        nonReentrant
+    {
+        require(isStrategyEnabled, "Strategy is disabled");
+        uint256 totalLPStaked = getTotalLPStaked();
+        require(totalLPStaked > 0, "No tokens staked");
+        updatePool();
+        uint256 withdrawnAmount = _withdrawAsset(totalLPStaked);
+        require(withdrawnAmount == totalLPStaked, "Unsuccessful strategy withdraw");
+        require(asset.balanceOf(address(this)) >= totalLPStaked, "Unsuccessful strategy withdraw");
+        stakingRewardsContract = _newStakingRewardsContract;
+        rewardToken = _newRewardToken;
+        uint256 depositedAmount = _depositAsset(totalLPStaked);
+        require(depositedAmount == totalLPStaked, "Invalid strategy deposit");
+        emit StrategySwitched(_newStakingRewardsContract, _newRewardToken);
     }
 }
