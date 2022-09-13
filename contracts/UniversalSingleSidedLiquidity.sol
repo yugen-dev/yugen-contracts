@@ -40,6 +40,11 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         uint256 amountB
     );
 
+    modifier ensureNonZeroAddress(address addressToCheck) {
+        require(addressToCheck != address(0), "No zero address");
+        _;
+    }
+
     constructor(
         IUniswapV2Router _uniswapV2Router,
         IDystRouter01 _dystRouter,
@@ -305,7 +310,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _toToken,
         uint256 _slippageAdjustedMinLP,
         address[] memory _swapPathForToToken
-    ) public payable nonReentrant returns (uint256 lpBought) {
+    ) public payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
         (address token0, address token1) = _getPairTokensUniswapV2(_pairAddress);
         require(
             _toToken == token0 || _toToken == token1,
@@ -469,7 +474,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _toToken,
         uint256 _slippageAdjustedMinLP,
         Route[] calldata _swapPathForToToken
-    ) public payable nonReentrant returns (uint256 lpBought) {
+    ) public payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
         (address token0, address token1, ) = _getPairTokensDystopia(_pairAddress);
         require(
             _toToken == token0 || _toToken == token1,
