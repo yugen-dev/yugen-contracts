@@ -48,4 +48,31 @@ interface IDystRouter01 is IRoute {
             uint256 amountB,
             uint256 liquidity
         );
+
+    function quoteAddLiquidity(
+        address tokenA,
+        address tokenB,
+        bool stable,
+        uint256 amountADesired,
+        uint256 amountBDesired
+    )
+        external
+        view
+        returns (
+            uint256 amountA,
+            uint256 amountB,
+            uint256 liquidity
+        );
+
+    function getExactAmountOut(
+        uint256 amountIn,
+        address tokenIn,
+        address tokenOut,
+        bool stable
+    ) external view returns (uint256 amount);
+
+    function getAmountsOut(uint256 amountIn, Route[] memory routes)
+        external
+        view
+        returns (uint256[] memory amounts);
 }
