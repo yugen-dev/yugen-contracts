@@ -31,14 +31,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
     uint256 private constant DEADLINE =
         0xf000000000000000000000000000000000000000000000000000000000000000;
 
-    event PooledLiquidity(
-        address sender,
-        address pool,
-        address tokenA,
-        uint256 amountA,
-        address tokenB,
-        uint256 amountB
-    );
+    event PooledLiquidity(address sender, address pool, uint256 liquidity);
 
     modifier ensureNonZeroAddress(address addressToCheck) {
         require(addressToCheck != address(0), "No zero address");
@@ -310,7 +303,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _toToken,
         uint256 _slippageAdjustedMinLP,
         address[] memory _swapPathForToToken
-    ) public payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
+    ) external payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
         (address token0, address token1) = _getPairTokensUniswapV2(_pairAddress);
         require(
             _toToken == token0 || _toToken == token1,
@@ -380,7 +373,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _fromToken,
         address _pairAddress,
         uint256 _amount
-    ) internal returns (uint256) {
+    ) internal returns (uint256 lpAmount) {
         (address _token0, address _token1) = _getPairTokensUniswapV2(_pairAddress);
 
         // divide intermediate into appropriate amount to add liquidity
@@ -397,7 +390,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         TransferHelper.safeApprove(address(_token1), address(uniswapV2Router), 0);
         TransferHelper.safeApprove(address(_token1), address(uniswapV2Router), _token1Bought);
 
-        (uint256 lpAmount, uint256 amountA, uint256 amountB) = uniswapV2Router.addLiquidity(
+        (, , lpAmount) = uniswapV2Router.addLiquidity(
             _token0,
             _token1,
             _token0Bought,
@@ -411,7 +404,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         _processTokenResidue(_token0, recipient);
         _processTokenResidue(_token1, recipient);
 
-        emit PooledLiquidity(msg.sender, _pairAddress, _token0, amountA, _token1, amountB);
+        emit PooledLiquidity(msg.sender, _pairAddress, lpAmount);
 
         return lpAmount;
     }
@@ -474,7 +467,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _toToken,
         uint256 _slippageAdjustedMinLP,
         Route[] calldata _swapPathForToToken
-    ) public payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
+    ) external payable nonReentrant ensureNonZeroAddress(_userAddress) returns (uint256 lpBought) {
         (address token0, address token1, ) = _getPairTokensDystopia(_pairAddress);
         require(
             _toToken == token0 || _toToken == token1,
@@ -517,6 +510,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
                 _amountOut,
                 _swapPathForToToken
             );
+
             lpBought = _processLiquidityDystopia(_toToken, _pairAddress, toInvest);
 
             //Returning Residue in from token amount, if any. If it was eth, then we send eth
@@ -544,7 +538,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         address _fromToken,
         address _pairAddress,
         uint256 _amount
-    ) internal returns (uint256) {
+    ) internal returns (uint256 lpAmount) {
         (address _token0, address _token1, bool _stable) = _getPairTokensDystopia(_pairAddress);
 
         // divide intermediate into appropriate amount to add liquidity
@@ -562,7 +556,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         TransferHelper.safeApprove(address(_token1), address(dystRouter), 0);
         TransferHelper.safeApprove(address(_token1), address(dystRouter), _token1Bought);
 
-        (uint256 lpAmount, uint256 amountA, uint256 amountB) = dystRouter.addLiquidity(
+        (, , lpAmount) = dystRouter.addLiquidity(
             _token0,
             _token1,
             _stable,
@@ -577,7 +571,7 @@ contract UniversalSingleSidedLiquidity is ReentrancyGuard, Ownable, IRoute {
         _processTokenResidue(_token0, recipient);
         _processTokenResidue(_token1, recipient);
 
-        emit PooledLiquidity(msg.sender, _pairAddress, _token0, amountA, _token1, amountB);
+        emit PooledLiquidity(msg.sender, _pairAddress, lpAmount);
 
         return lpAmount;
     }
