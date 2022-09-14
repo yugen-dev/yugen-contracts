@@ -55,7 +55,8 @@
     "executeConverter": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/executeConverter.js",
     "deployPenroseStrategy:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploy_penroseStrategy.js",
     "deployDystConverter:matic": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployDystConverter.js",
-    "deploySingleSidedLiquidityV2:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploySingleSidedLiquidityV2.js"
+    "deploySingleSidedLiquidityV2:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deploySingleSidedLiquidityV2.js",
+    "deployUniversalSingleSidedLiquidity:main": "HARDHAT_NETWORK=matic npx hardhat run scripts/deploy/deployUniversalSingleSidedLiquidity.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
